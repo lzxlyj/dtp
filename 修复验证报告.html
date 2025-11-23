@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证报告</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .log { background: #f5f5f5; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>黑暗三角人格测试 - 修复验证报告</h1>
+    
+    <div class="test-section">
+        <h2>修复内容</h2>
+        <p><strong>主要问题：</strong>comprehensive_score_test.html 中存在变量重复定义问题</p>
+        <p><strong>修复方案：</strong>移除了脚本加载过程中的临时变量保存和恢复逻辑，简化为直接加载两个JavaScript文件</p>
+        <p><strong>修复时间：</strong><span id="fix-time"></span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>验证测试</h2>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>控制台日志</h2>
+        <div id="console-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>修复状态</h2>
+        <div id="final-status"></div>
+    </div>
+
+    <!-- 加载原始脚本 -->
+    <script src="optimized_scoring.js"></script>
+    <script src="auto_test_scores.js"></script>
+    
+    <script>
+        // 记录修复时间
+        document.getElementById('fix-time').textContent = new Date().toLocaleString();
+        
+        const resultsDiv = document.getElementById('test-results');
+        const logDiv = document.getElementById('console-log');
+        const statusDiv = document.getElementById('final-status');
+        
+        let allTestsPassed = true;
+        const log = [];
+        
+        function addLog(message) {
+            log.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+            logDiv.textContent = log.join('\n');
+            console.log(message);
+        }
+        
+        function addTestResult(testName, passed, message = '') {
+            const div = document.createElement('div');
+            div.className = passed ? 'success' : 'error';
+            div.innerHTML = `${passed ? '✅' : '❌'} ${testName}: ${passed ? '通过' : '失败'} ${message}`;
+            resultsDiv.appendChild(div);
+            
+            if (!passed) allTestsPassed = false;
+            addLog(`${testName}: ${passed ? '通过' : '失败'} ${message}`);
+        }
+        
+        // 开始验证测试
+        addLog('开始修复验证测试...');
+        
+        // 测试1: 检查关键变量是否存在冲突
+        addLog('检查变量冲突...');
+        const variables = [
+            { name: 'dimensionNames', type: 'object' },
+            { name: 'analysisTexts', type: 'object' },
+            { name: 'ScoreAnalysisTester', type: 'function' },
+            { name: 'testScores', type: 'object' }
+        ];
+        
+        variables.forEach(variable => {
+            const exists = typeof window[variable.name] !== 'undefined';
+            const typeMatch = exists ? typeof window[variable.name] : 'undefined';
+            const correctType = typeMatch === variable.type;
+            
+            addTestResult(
+                `变量 ${variable.name} 检查`,
+                exists && correctType,
+                exists ? (correctType ? `(${typeMatch})` : `类型错误: ${typeMatch}, 期望: ${variable.type}`) : '未定义'
+            );
+        });
+        
+        // 测试2: 检查数据完整性
+        addLog('检查数据完整性...');
+        if (typeof analysisTexts !== 'undefined') {
+            const dimensions = Object.keys(analysisTexts);
+            const hasAllDimensions = dimensions.length === 10;
+            addTestResult('analysisTexts 维度完整性', hasAllDimensions, `找到 ${dimensions.length}/10 个维度`);
+            
+            if (hasAllDimensions) {
+                const allLevelsComplete = dimensions.every(dim => {
+                    return analysisTexts[dim] && 
+                           analysisTexts[dim].low && 
+                           analysisTexts[dim].medium && 
+                           analysisTexts[dim].high;
+                });
+                addTestResult('analysisTexts 级别完整性', allLevelsComplete);
+            }
+        } else {
+            addTestResult('analysisTexts 数据检查', false, 'analysisTexts 未定义');
+        }
+        
+        // 测试3: 检查ScoreAnalysisTester类功能
+        addLog('测试ScoreAnalysisTester类...');
+        if (typeof ScoreAnalysisTester !== 'undefined') {
+            try {
+                const tester = new ScoreAnalysisTester();
+                addTestResult('ScoreAnalysisTester 实例化', true);
+                
+                // 测试基本方法
+                const methods = ['getLevel', 'validateAnalysisText', 'runCompleteTest'];
+                methods.forEach(method => {
+                    const exists = typeof tester[method] === 'function';
+                    addTestResult(`ScoreAnalysisTester.${method} 方法`, exists);
+                });
+                
+            } catch (error) {
+                addTestResult('ScoreAnalysisTester 功能测试', false, error.message);
+            }
+        } else {
+            addTestResult('ScoreAnalysisTester 类测试', false, '类未定义');
+        }
+        
+        // 测试4: 运行快速验证测试
+        addLog('运行快速验证测试...');
+        if (typeof runQuickTest === 'function') {
+            try {
+                const result = runQuickTest();
+                addTestResult('快速验证测试', result.success, result.message);
+            } catch (error) {
+                addTestResult('快速验证测试', false, error.message);
+            }
+        } else {
+            addTestResult('快速验证测试', false, 'runQuickTest 函数未定义');
+        }
+        
+        // 最终状态
+        addLog('验证测试完成');
+        statusDiv.innerHTML = `
+            <h3 class="${allTestsPassed ? 'success' : 'error'}">
+                ${allTestsPassed ? '✅ 修复成功！' : '❌ 修复未完全成功'}
+            </h3>
+            <p><strong>状态：</strong>${allTestsPassed ? '所有测试通过，变量冲突问题已解决' : '部分测试失败，需要进一步检查'}</p>
+            <p><strong>建议：</strong>${allTestsPassed ? '可以正常使用comprehensive_score_test.html页面' : '请检查控制台日志了解详细信息'}</p>
+        `;
+        
+        // 添加页面加载成功的额外确认
+        addLog('页面加载完成，修复验证测试执行完毕');
+    </script>
+</body>
+</html>

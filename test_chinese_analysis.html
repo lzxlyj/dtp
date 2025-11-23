@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文分析文本测试 - 黑暗三角人格测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        h1, h2 {
+            color: #f8fafc;
+            text-align: center;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+        .dimension-test {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(51, 65, 85, 0.4);
+            border-radius: 8px;
+        }
+        .score-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .score-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .low-btn {
+            background: #10b981;
+            color: white;
+        }
+        .medium-btn {
+            background: #f59e0b;
+            color: white;
+        }
+        .high-btn {
+            background: #ef4444;
+            color: white;
+        }
+        .score-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .analysis-result {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            display: none;
+        }
+        .analysis-result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .comprehensive-test {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .comp-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .comp-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .status-ok {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .status-error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>中文分析文本测试</h1>
+        <p style="text-align: center; color: #94a3b8;">测试详细维度分析和综合分析的中文显示效果</p>
+
+        <div class="test-section">
+            <h2>维度分析测试</h2>
+            <p>点击不同分数按钮，测试对应的中文分析文本是否正确显示：</p>
+            
+            <div class="dimension-test">
+                <h3>利己主义 (selfInterest)</h3>
+                <div class="score-buttons">
+                    <button class="score-btn low-btn" onclick="showDimensionAnalysis('selfInterest', 'low')">低水平 (0-33%)</button>
+                    <button class="score-btn medium-btn" onclick="showDimensionAnalysis('selfInterest', 'medium')">中等水平 (34-66%)</button>
+                    <button class="score-btn high-btn" onclick="showDimensionAnalysis('selfInterest', 'high')">高水平 (67-100%)</button>
+                </div>
+                <div id="selfInterest-analysis" class="analysis-result"></div>
+            </div>
+
+            <div class="dimension-test">
+                <h3>贪婪 (greed)</h3>
+                <div class="score-buttons">
+                    <button class="score-btn low-btn" onclick="showDimensionAnalysis('greed', 'low')">低水平</button>
+                    <button class="score-btn medium-btn" onclick="showDimensionAnalysis('greed', 'medium')">中等水平</button>
+                    <button class="score-btn high-btn" onclick="showDimensionAnalysis('greed', 'high')">高水平</button>
+                </div>
+                <div id="greed-analysis" class="analysis-result"></div>
+            </div>
+
+            <div class="dimension-test">
+                <h3>马基雅维利主义 (machiavellianism)</h3>
+                <div class="score-buttons">
+                    <button class="score-btn low-btn" onclick="showDimensionAnalysis('machiavellianism', 'low')">低水平</button>
+                    <button class="score-btn medium-btn" onclick="showDimensionAnalysis('machiavellianism', 'medium')">中等水平</button>
+                    <button class="score-btn high-btn" onclick="showDimensionAnalysis('machiavellianism', 'high')">高水平</button>
+                </div>
+                <div id="machiavellianism-analysis" class="analysis-result"></div>
+            </div>
+
+            <div class="dimension-test">
+                <h3>精神变态 (psychopathy)</h3>
+                <div class="score-buttons">
+                    <button class="score-btn low-btn" onclick="showDimensionAnalysis('psychopathy', 'low')">低水平</button>
+                    <button class="score-btn medium-btn" onclick="showDimensionAnalysis('psychopathy', 'medium')">中等水平</button>
+                    <button class="score-btn high-btn" onclick="showDimensionAnalysis('psychopathy', 'high')">高水平</button>
+                </div>
+                <div id="psychopathy-analysis" class="analysis-result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>综合分析测试</h2>
+            <p>测试整体黑暗三角人格特质的中文综合分析：</p>
+            
+            <div class="comprehensive-test">
+                <div class="comp-buttons">
+                    <button class="comp-btn low-btn" onclick="showComprehensiveAnalysis('low')">整体低水平</button>
+                    <button class="comp-btn medium-btn" onclick="showComprehensiveAnalysis('medium')">整体中等水平</button>
+                    <button class="comp-btn high-btn" onclick="showComprehensiveAnalysis('high')">整体高水平</button>
+                </div>
+                <div id="comprehensive-analysis" class="analysis-result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>测试状态</h2>
+            <div id="test-status">
+                <p>等待测试中...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 中文分析文本（从index.html复制）
+        const analysisTexts = {
+            selfInterest: {
+                low: "你的利己主义倾向处于低水平（0-33%），表明你对个人利益关注较少，更注重集体和他人的需求。你愿意为了更大的利益牺牲个人利益，这种品质在团队合作和人际关系中非常宝贵。",
+                medium: "你的利己主义倾向处于中等水平（34-66%），能够在个人和集体利益之间找到平衡。在大多数情况下，你会考虑他人的感受，但在必要时也会为自己争取合理的利益。",
+                high: "你的利己主义倾向处于高水平（67-100%），表现出对个人利益的强烈关注，倾向于优先考虑自己的需求和目标。这种特质可以帮助你在竞争环境中取得成功，但也可能影响你的人际关系和团队合作。"
+            },
+            greed: {
+                low: "你的贪婪水平较低（0-33%），对物质财富和权力没有强烈渴望，更注重精神层面的满足。你容易感到满足，不会过度追求不属于自己的东西。",
+                medium: "你的贪婪水平处于中等（34-66%），对物质和权力有一定追求，但能够将其控制在合理范围内。你理解努力工作的价值，也知道如何适度享受生活。",
+                high: "你的贪婪水平较高（67-100%），对物质财富和权力有着强烈渴望，总是想要更多。这种强烈欲望可以成为进步的动力，但也可能让你忽视生活中其他重要领域。"
+            },
+            machiavellianism: {
+                low: "你的马基雅维利主义处于低水平（0-33%），你是一个非常诚实正直的人，不屑于使用操控或欺骗来达到目的。你认为真诚和公平是处理人际关系的最佳方式，在工作和生活中倾向于直接表达自己的想法，不会刻意隐藏真实意图或耍手段。",
+                medium: "你的马基雅维利主义处于中等水平（34-66%），能够在策略性思维和道德原则之间找到平衡。在某些情况下，你会运用策略性思维来实现目标，但不会跨越道德界限，能够根据不同情况调整自己的行为，在需要时展现外交技巧。",
+                high: "你的马基雅维利主义处于高水平（67-100%），非常善于策略性思维和操控他人，愿意为了达到目的不择手段。你能够敏锐地观察他人的弱点并巧妙加以利用，在处理复杂情况时常常能够制定精妙的策略，善于隐藏自己的真实意图。"
+            },
+            psychopathy: {
+                low: "你的精神变态处于低水平（0-33%），你非常在意他人的感受和福祉，总是尽量避免伤害他人。你具有强烈的同理心和责任感，是一个非常善良体贴的人，能够深刻感受到他人的情绪和痛苦。",
+                medium: "你的精神变态处于中等水平（34-66%），在大多数情况下能够控制自己的冲动和行为，但在某些情况下也可能表现出冷漠或冲动的一面。你能够理解他人的感受，但有时也会优先考虑自己的需求，能够在理性和感性之间找到平衡。",
+                high: "你的精神变态处于高水平（67-100%），经常表现出冷漠、冲动和不负责任的行为，不太在意他人的感受和福祉。你可以轻易伤害他人而不感到内疚，经常违反社会规则和道德标准，倾向于追求即时满足和刺激。"
+            }
+        };
+
+        const comprehensiveAnalyses = {
+            low: "你的整体黑暗三角人格特质处于低水平（0-33%），表明你是一个非常善良、正直且有同理心的人。你重视道德原则，关心他人感受，不会为了个人利益伤害他人。这种特质使你在人际关系中很受欢迎，能够建立深厚且值得信赖的关系。不过，你也需要注意不要过于轻信他人，要适当保护自己的利益。",
+            medium: "你的整体黑暗三角人格特质处于中等水平（34-66%），表明你在善良和自我保护之间找到了一定的平衡。你具有基本的道德原则，但在某些情况下也会为自己的利益奋斗。你能够理解人性的复杂性，不会过度理想化或贬低他人。这种平衡的特质使你能够在大多数情况下适应不同环境和人际关系。",
+            high: "你的整体黑暗三角人格特质处于高水平（67-100%），表明你是一个非常自信、善于策略性思维且注重自我保护的人。你能够敏锐地观察他人和环境，以最大化自己的利益。这种特质可能会在竞争环境中为你带来一定成功，但也可能影响你的人际关系和长期发展。建议你适当关注他人感受，建立更深层的信任关系。"
+        };
+
+        function showDimensionAnalysis(dimension, level) {
+            const analysisDiv = document.getElementById(`${dimension}-analysis`);
+            const text = analysisTexts[dimension][level];
+            
+            if (text) {
+                analysisDiv.innerHTML = `
+                    <h4>${level === 'low' ? '低水平' : level === 'medium' ? '中等水平' : '高水平'} 分析：</h4>
+                    <p>${text}</p>
+                `;
+                analysisDiv.classList.add('show');
+                updateStatus(`✅ ${dimension} - ${level} 分析文本显示正常`, 'ok');
+            } else {
+                analysisDiv.innerHTML = `<p style="color: #ef4444;">错误：找不到对应的分析文本</p>`;
+                analysisDiv.classList.add('show');
+                updateStatus(`❌ ${dimension} - ${level} 分析文本缺失`, 'error');
+            }
+        }
+
+        function showComprehensiveAnalysis(level) {
+            const analysisDiv = document.getElementById('comprehensive-analysis');
+            const text = comprehensiveAnalyses[level];
+            
+            if (text) {
+                analysisDiv.innerHTML = `
+                    <h4>整体${level === 'low' ? '低水平' : level === 'medium' ? '中等水平' : '高水平'} 综合分析：</h4>
+                    <p>${text}</p>
+                `;
+                analysisDiv.classList.add('show');
+                updateStatus(`✅ 综合分析 (${level}) 显示正常`, 'ok');
+            } else {
+                analysisDiv.innerHTML = `<p style="color: #ef4444;">错误：找不到综合分析文本</p>`;
+                analysisDiv.classList.add('show');
+                updateStatus(`❌ 综合分析文本缺失`, 'error');
+            }
+        }
+
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.innerHTML = `<p class="status-${type}">${message}</p>`;
+        }
+
+        // 页面加载完成后显示状态
+        window.onload = function() {
+            updateStatus('✅ 中文分析文本测试页面加载完成，可以开始测试', 'ok');
+        };
+    </script>
+</body>
+</html>

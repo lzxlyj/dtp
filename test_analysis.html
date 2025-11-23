@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>详细分析功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .result { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>详细分析功能测试</h1>
+    
+    <!-- 模拟马基雅维利主义详细分析区域 -->
+    <div class="test-section">
+        <h3>马基雅维利主义详细分析</h3>
+        <div class="result">
+            <p id="machiavellianism-detail-percentage-text"></p>
+            <ul id="machiavellianism-detail-suggestions"></ul>
+        </div>
+    </div>
+    
+    <!-- 模拟自恋详细分析区域 -->
+    <div class="test-section">
+        <h3>自恋详细分析</h3>
+        <div class="result">
+            <p id="narcissism-detail-percentage-text"></p>
+            <ul id="narcissism-detail-suggestions"></ul>
+        </div>
+    </div>
+    
+    <!-- 模拟精神变态详细分析区域 -->
+    <div class="test-section">
+        <h3>精神变态详细分析</h3>
+        <div class="result">
+            <p id="psychopathy-detail-percentage-text"></p>
+            <ul id="psychopathy-detail-suggestions"></ul>
+        </div>
+    </div>
+    
+    <!-- 测试结果 -->
+    <div id="test-results" class="test-section">
+        <h3>测试结果</h3>
+    </div>
+
+    <script>
+        // 复制主文件的函数
+        function getDimensionChineseName(dimensionKey) {
+            const names = {
+                'machiavellianism': '马基雅维利主义',
+                'narcissism': '自恋',
+                'psychopathy': '精神变态'
+            };
+            return names[dimensionKey] || dimensionKey;
+        }
+        
+        function getLevelText(level) {
+            const levelTexts = {
+                'low': '较低',
+                'medium': '中等',
+                'high': '较高'
+            };
+            return levelTexts[level] || '未知';
+        }
+        
+        function getSuggestions(dimensionKey, level, score) {
+            const suggestions = {
+                machiavellianism: {
+                    low: [
+                        '继续保持你的正直和诚实品质',
+                        '在团队合作中发挥你的可信度',
+                        '帮助他人建立信任和透明度',
+                        '在需要策略性思考时，可以适当学习一些沟通技巧'
+                    ],
+                    medium: [
+                        '在保持策略性思维的同时，注意道德底线',
+                        '学会在诚实和策略之间找到平衡',
+                        '在职场竞争中保持公平竞争原则',
+                        '培养长期的人际关系，而非短期利益'
+                    ],
+                    high: [
+                        '反思自己的行为对他人的影响',
+                        '学习建立基于信任的人际关系',
+                        '考虑寻求专业心理咨询，了解深层动机',
+                        '练习同理心，尝试理解他人的感受和需求',
+                        '建立健康的道德标准和行为准则'
+                    ]
+                },
+                narcissism: {
+                    low: [
+                        '适当提升自信，认识到自己的价值和成就',
+                        '学会在适当的时候表达自己的想法和需求',
+                        '不要害怕在团队中承担领导角色',
+                        '培养健康的自我形象和自尊'
+                    ],
+                    medium: [
+                        '保持现有的健康自信水平',
+                        '继续发展自己的优势和能力',
+                        '在关注自己的同时，也要关注他人的贡献',
+                        '建立平衡的人际关系，避免过度自我中心'
+                    ],
+                    high: [
+                        '学习谦逊和感恩的态度',
+                        '关注他人的需求和感受，培养同理心',
+                        '接受批评和反馈，不要过度防御',
+                        '认识到每个人都有独特的价值和贡献',
+                        '建立真实的人际关系，而非基于炫耀的关系'
+                    ]
+                },
+                psychopathy: {
+                    low: [
+                        '继续保持你的善良和同理心',
+                        '在人际关系中发挥你的情感敏感度',
+                        '帮助他人处理情绪和冲突',
+                        '在需要理性决策时，可以适当平衡情感因素'
+                    ],
+                    medium: [
+                        '在理性和情感之间找到更好的平衡',
+                        '学会识别和管理自己的冲动情绪',
+                        '在做出重要决策时，考虑长期后果',
+                        '培养更深层次的情感连接和人际关系'
+                    ],
+                    high: [
+                        '认真考虑寻求专业心理健康支持',
+                        '学习识别和理解自己及他人的情绪',
+                        '练习冲动控制和延迟满足',
+                        '建立健康的道德和伦理标准',
+                        '考虑行为对他人造成的伤害和后果',
+                        '发展真正的同理心和情感连接能力'
+                    ]
+                }
+            };
+            
+            return suggestions[dimensionKey][level] || [];
+        }
+        
+        function updateDetailedAnalysis(dimensionKey, score, level) {
+            const percentageTextElement = document.getElementById(`${dimensionKey}-detail-percentage-text`);
+            const suggestionsElement = document.getElementById(`${dimensionKey}-detail-suggestions`);
+            
+            if (percentageTextElement && suggestionsElement) {
+                // 设置百分比文本
+                percentageTextElement.textContent = `您的${getDimensionChineseName(dimensionKey)}得分为${score}%，属于${getLevelText(level)}水平。`;
+                
+                // 设置建议内容
+                const suggestions = getSuggestions(dimensionKey, level, score);
+                suggestionsElement.innerHTML = suggestions.map(suggestion => `<li>${suggestion}</li>`).join('');
+                
+                return true;
+            }
+            return false;
+        }
+        
+        // 测试函数
+        function runTest() {
+            const results = document.getElementById('test-results');
+            let successCount = 0;
+            let totalTests = 3;
+            
+            // 测试马基雅维利主义
+            const machSuccess = updateDetailedAnalysis('machiavellianism', 75, 'high');
+            if (machSuccess) {
+                successCount++;
+                results.innerHTML += '<p class="success">✓ 马基雅维利主义详细分析功能正常</p>';
+            } else {
+                results.innerHTML += '<p class="error">✗ 马基雅维利主义详细分析功能异常</p>';
+            }
+            
+            // 测试自恋
+            const narcSuccess = updateDetailedAnalysis('narcissism', 45, 'medium');
+            if (narcSuccess) {
+                successCount++;
+                results.innerHTML += '<p class="success">✓ 自恋详细分析功能正常</p>';
+            } else {
+                results.innerHTML += '<p class="error">✗ 自恋详细分析功能异常</p>';
+            }
+            
+            // 测试精神变态
+            const psychSuccess = updateDetailedAnalysis('psychopathy', 20, 'low');
+            if (psychSuccess) {
+                successCount++;
+                results.innerHTML += '<p class="success">✓ 精神变态详细分析功能正常</p>';
+            } else {
+                results.innerHTML += '<p class="error">✗ 精神变态详细分析功能异常</p>';
+            }
+            
+            results.innerHTML += `<p><strong>测试结果：${successCount}/${totalTests} 通过</strong></p>`;
+            
+            if (successCount === totalTests) {
+                results.innerHTML += '<p class="success">所有详细分析功能都正常工作！</p>';
+            } else {
+                results.innerHTML += '<p class="error">部分功能存在问题，请检查元素ID是否正确。</p>';
+            }
+        }
+        
+        // 页面加载完成后运行测试
+        window.onload = runTest;
+    </script>
+</body>
+</html>

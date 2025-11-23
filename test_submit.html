@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黑暗三角人格测试 - 提交功能测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#333333',
+                        secondary: '#1a1a1a',
+                        accent: '#8A2BE2',
+                        'accent-light': '#9370DB',
+                        'accent-dark': '#4B0082',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .bg-gradient-purple {
+                background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%);
+            }
+            .text-shadow {
+                text-shadow: 0 0 10px rgba(138, 43, 226, 0.7);
+            }
+            .border-glow {
+                box-shadow: 0 0 5px rgba(138, 43, 226, 0.7);
+            }
+        }
+    </style>
+    <style>
+        body {
+            background-color: #121212;
+            color: #F8F9FA;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .question-card {
+            background-color: rgba(26, 26, 26, 0.8);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+            background-color: rgba(51, 51, 51, 0.8);
+            color: #F8F9FA;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+        .option-btn:hover {
+            background-color: rgba(138, 43, 226, 0.3);
+        }
+        .option-btn.selected {
+            background-color: rgba(138, 43, 226, 0.7);
+            border: 1px solid rgba(138, 43, 226, 1);
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(51, 51, 51, 0.8);
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8A2BE2 0%, #4B0082 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-900 text-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8 text-accent">黑暗三角人格测试 - 提交功能测试</h1>
+        
+        <div id="test-section">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-accent">测试题</h2>
+                <div class="text-sm text-gray-400">问题 <span id="current-question">1</span>/5</div>
+            </div>
+            
+            <div class="progress-bar">
+                <div id="progress-bar-fill" class="progress-bar-fill" style="width: 20%"></div>
+            </div>
+            
+            <div id="question-container" class="question-card">
+                <h3 id="question-text" class="text-xl font-medium mb-6">问题加载中...</h3>
+                <div id="options-container" class="space-y-3">
+                    <!-- 选项将通过JavaScript动态插入 -->
+                </div>
+            </div>
+            
+            <div class="flex justify-between mt-6">
+                <button id="prev-btn" class="btn-secondary" disabled>上一题</button>
+                <button id="next-btn" class="btn-primary">下一题</button>
+            </div>
+        </div>
+        
+        <div id="result-section" class="hidden">
+            <h2 class="text-2xl font-bold text-center mb-8 text-accent">测试结果</h2>
+            
+            <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+                <h3 class="text-xl font-semibold mb-4">分数计算结果</h3>
+                <div id="scores-container" class="space-y-4">
+                    <!-- 分数将通过JavaScript动态插入 -->
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button id="restart-test-btn" class="btn-primary">重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简化的测试题目数据
+        const questions = [
+            {
+                id: 1,
+                category: "测试篇",
+                text: "测试问题 1",
+                options: [
+                    { value: 1, text: "选项 A" },
+                    { value: 2, text: "选项 B" },
+                    { value: 3, text: "选项 C" },
+                    { value: 4, text: "选项 D" },
+                    { value: 5, text: "选项 E" }
+                ],
+                dimensions: {
+                    selfInterest: 0.5,
+                    machiavellianism: 0.3
+                }
+            },
+            {
+                id: 2,
+                category: "测试篇",
+                text: "测试问题 2",
+                options: [
+                    { value: 1, text: "选项 A" },
+                    { value: 2, text: "选项 B" },
+                    { value: 3, text: "选项 C" },
+                    { value: 4, text: "选项 D" },
+                    { value: 5, text: "选项 E" }
+                ],
+                dimensions: {
+                    psychopathy: 0.7,
+                    narcissism: 0.5
+                }
+            },
+            {
+                id: 3,
+                category: "测试篇",
+                text: "测试问题 3",
+                options: [
+                    { value: 1, text: "选项 A" },
+                    { value: 2, text: "选项 B" },
+                    { value: 3, text: "选项 C" },
+                    { value: 4, text: "选项 D" },
+                    { value: 5, text: "选项 E" }
+                ],
+                dimensions: {
+                    greed: 0.5,
+                    moralDisengagement: 0.3
+                }
+            },
+            {
+                id: 4,
+                category: "测试篇",
+                text: "测试问题 4",
+                options: [
+                    { value: 1, text: "选项 A" },
+                    { value: 2, text: "选项 B" },
+                    { value: 3, text: "选项 C" },
+                    { value: 4, text: "选项 D" },
+                    { value: 5, text: "选项 E" }
+                ],
+                dimensions: {
+                    psychologicalEntitlement: 0.7,
+                    selfCentered: 0.5
+                }
+            },
+            {
+                id: 5,
+                category: "测试篇",
+                text: "测试问题 5",
+                options: [
+                    { value: 1, text: "选项 A" },
+                    { value: 2, text: "选项 B" },
+                    { value: 3, text: "选项 C" },
+                    { value: 4, text: "选项 D" },
+                    { value: 5, text: "选项 E" }
+                ],
+                dimensions: {
+                    sadism: 0.3,
+                    malevolence: 0.5
+                }
+            }
+        ];
+        
+        // 全局变量
+        let currentQuestionIndex = 0;
+        const userAnswers = new Array(questions.length).fill(null);
+        let userScores = {
+            selfInterest: 0,
+            greed: 0,
+            machiavellianism: 0,
+            moralDisengagement: 0,
+            narcissism: 0,
+            psychologicalEntitlement: 0,
+            psychopathy: 0,
+            sadism: 0,
+            selfCentered: 0,
+            malevolence: 0,
+            darkTriadTotal: 0
+        };
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuestion(0);
+            
+            // 上一题
+            document.getElementById('prev-btn').addEventListener('click', function() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    loadQuestion(currentQuestionIndex);
+                }
+            });
+            
+            // 下一题
+            document.getElementById('next-btn').addEventListener('click', function() {
+                if (userAnswers[currentQuestionIndex] === null) {
+                    alert('请选择一个选项');
+                    return;
+                }
+                
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    loadQuestion(currentQuestionIndex);
+                } else {
+                    // 提交测试
+                    submitTest();
+                }
+            });
+            
+            // 重新测试
+            document.getElementById('restart-test-btn').addEventListener('click', function() {
+                location.reload();
+            });
+        });
+        
+        // 加载问题
+        function loadQuestion(index) {
+            const question = questions[index];
+            document.getElementById('question-text').textContent = question.text;
+            document.getElementById('current-question').textContent = index + 1;
+            
+            // 更新进度条
+            const progress = ((index + 1) / questions.length) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${progress}%`;
+            
+            // 更新按钮状态
+            document.getElementById('prev-btn').disabled = index === 0;
+            
+            // 生成选项
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option.text;
+                
+                // 如果已经回答过这个问题，显示选中状态
+                if (userAnswers[index] === option.value) {
+                    button.classList.add('selected');
+                }
+                
+                button.addEventListener('click', function() {
+                    // 移除其他选项的选中状态
+                    document.querySelectorAll('.option-btn').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    
+                    // 添加当前选项的选中状态
+                    this.classList.add('selected');
+                    
+                    // 保存答案
+                    userAnswers[index] = option.value;
+                });
+                
+                optionsContainer.appendChild(button);
+            });
+            
+            // 更新下一题按钮文本
+            if (index === questions.length - 1) {
+                document.getElementById('next-btn').innerHTML = '提交<i class="fa fa-check ml-2"></i>';
+            } else {
+                document.getElementById('next-btn').innerHTML = '下一题<i class="fa fa-arrow-right ml-2"></i>';
+            }
+        }
+        
+        // 提交测试
+        function submitTest() {
+            try {
+                // 计算分数
+                calculateScores();
+                
+                // 显示结果
+                showResult();
+                
+                console.log('测试提交成功！');
+            } catch (error) {
+                console.error('测试提交失败:', error);
+                alert('提交失败，请重试！');
+            }
+        }
+        
+        // 计算分数
+        function calculateScores() {
+            // 初始化分数对象
+            const scores = {
+                selfInterest: 0,
+                greed: 0,
+                machiavellianism: 0,
+                moralDisengagement: 0,
+                narcissism: 0,
+                psychologicalEntitlement: 0,
+                psychopathy: 0,
+                sadism: 0,
+                selfCentered: 0,
+                malevolence: 0
+            };
+            
+            // 计算各维度得分
+            questions.forEach((question, index) => {
+                const answer = userAnswers[index];
+                if (answer !== null) {
+                    Object.keys(question.dimensions).forEach(dimension => {
+                        scores[dimension] += answer * question.dimensions[dimension];
+                    });
+                }
+            });
+            
+            // 计算各维度总分（用于百分比计算）
+            const dimensionTotals = {
+                selfInterest: 0,
+                greed: 0,
+                machiavellianism: 0,
+                moralDisengagement: 0,
+                narcissism: 0,
+                psychologicalEntitlement: 0,
+                psychopathy: 0,
+                sadism: 0,
+                selfCentered: 0,
+                malevolence: 0
+            };
+            
+            questions.forEach(question => {
+                Object.keys(question.dimensions).forEach(dimension => {
+                    dimensionTotals[dimension] += 5 * question.dimensions[dimension];
+                });
+            });
+            
+            // 转换为百分比（保留一位小数）
+            Object.keys(scores).forEach(key => {
+                scores[key] = dimensionTotals[key] > 0 ? parseFloat((scores[key] / dimensionTotals[key] * 100).toFixed(1)) : 0;
+            });
+            
+            // 计算黑暗三角人格总分(D)
+            // D = (马基雅维利主义 + 心理变态 + 自恋) / 3
+            scores.darkTriadTotal = parseFloat(((
+                scores.machiavellianism + 
+                scores.psychopathy + 
+                scores.narcissism
+            ) / 3).toFixed(1));
+            
+            // 更新全局用户分数
+            Object.assign(userScores, scores);
+            
+            console.log('分数计算完成:', userScores);
+        }
+        
+        // 显示结果
+        function showResult() {
+            document.getElementById('test-section').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+            
+            // 显示分数
+            const scoresContainer = document.getElementById('scores-container');
+            scoresContainer.innerHTML = '';
+            
+            const dimensionNames = {
+                selfInterest: '利己主义',
+                greed: '贪婪',
+                machiavellianism: '马基雅维利主义',
+                moralDisengagement: '道德推脱',
+                narcissism: '自恋',
+                psychologicalEntitlement: '心理权利',
+                psychopathy: '精神变态',
+                sadism: '施虐倾向',
+                selfCentered: '自我为中心',
+                malevolence: '恶毒倾向',
+                darkTriadTotal: '黑暗三角总分(D)'
+            };
+            
+            Object.keys(userScores).forEach(key => {
+                const scoreElement = document.createElement('div');
+                scoreElement.className = 'mb-4';
+                scoreElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span>${dimensionNames[key]}</span>
+                        <span class="font-bold text-accent">${userScores[key]}%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-accent h-2 rounded-full" style="width: ${userScores[key]}%"></div>
+                    </div>
+                `;
+                scoresContainer.appendChild(scoreElement);
+            });
+        }
+    </script>
+</body>
+</html>

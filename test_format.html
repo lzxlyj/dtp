@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>格式测试</title>
+</head>
+<body>
+    <h1>三大维度文本格式测试</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // 从index.html中提取的analysisTexts数据
+        const analysisTexts = {
+            machiavellianism: {
+                low: "你的马基雅维利主义处于较低水平（0-33%），是一个非常正直和诚实的人，不屑于使用操纵或欺骗的手段来达到目的。你相信真诚和公平是处理人际关系的最佳方式，在工作和生活中倾向于直接表达自己的想法，不会刻意隐藏真实意图或玩弄心计。",
+                medium: "你的马基雅维利主义处于中等水平（34-66%），能够在策略性思维和道德原则之间找到平衡。在某些情况下你会使用策略性思维来达到目的，但不会越过道德底线，能够根据不同的情况调整自己的行为方式，在需要时展现出一定的外交手腕。",
+                high: "你的马基雅维利主义处于较高水平（67-100%），非常善于策略性思考和操纵他人，为了达到目的可以不择手段。你能够敏锐地观察他人的弱点，并巧妙地加以利用，在处理复杂情况时往往能够制定出精妙的策略，善于隐藏自己的真实意图。"
+            },
+            narcissism: {
+                low: "你的自恋处于较低水平（0-33%），是一个非常谦虚和低调的人，不太关注自己的成就和优点。你更倾向于看到他人的价值和贡献，而不是强调自己的重要性，通常对自己的能力有清醒的认识。",
+                medium: "你的自恋处于中等水平（34-66%），对自己有合理的自信，能够认识到自己的优点和不足。你在适当的时候会表现自己，但不会过分炫耀或自大，能够在自我肯定和谦逊之间找到合适的平衡点。",
+                high: "你的自恋处于较高水平（67-100%），非常自信，甚至有些自负，总是希望成为关注的焦点。你相信自己比他人更优秀，应该得到特殊的待遇和认可，渴望成为众人瞩目的中心，享受被赞美和崇拜的感觉。"
+            },
+            psychopathy: {
+                low: "你的精神病态处于较低水平（0-33%），非常重视他人的感受和福祉，总是尽量避免伤害他人。你有强烈的同理心和责任感，是一个非常善良和体贴的人，能够深刻地感受到他人的情绪和痛苦。",
+                medium: "你的精神病态处于中等水平（34-66%），在大多数情况下能够控制自己的冲动和行为，但在某些情况下也可能表现出冷漠或冲动的一面。你能够理解他人的感受，但有时也会优先考虑自己的需求，能够在理性和感性之间找到平衡。",
+                high: "你的精神病态处于较高水平（67-100%），经常表现出冷漠、冲动和不负责任的行为，不太关心他人的感受和福祉。你能够轻易地伤害他人而不感到内疚，经常违反社会规则和道德准则，倾向于追求即时的满足和刺激。"
+            }
+        };
+        
+        // 检查格式
+        function checkFormat() {
+            const results = [];
+            
+            for (const dimension in analysisTexts) {
+                for (const level in analysisTexts[dimension]) {
+                    const text = analysisTexts[dimension][level];
+                    const hasCorrectFormat = text.startsWith(`你的${dimension === 'machiavellianism' ? '马基雅维利主义' : dimension === 'narcissism' ? '自恋' : '精神病态'}处于`);
+                    
+                    results.push({
+                        dimension: dimension,
+                        level: level,
+                        text: text,
+                        formatCorrect: hasCorrectFormat,
+                        startsWith: text.substring(0, 20) + '...'
+                    });
+                }
+            }
+            
+            return results;
+        }
+        
+        // 显示结果
+        const results = checkFormat();
+        const resultsDiv = document.getElementById('test-results');
+        
+        results.forEach(result => {
+            const div = document.createElement('div');
+            div.style.marginBottom = '10px';
+            div.style.padding = '10px';
+            div.style.backgroundColor = result.formatCorrect ? '#e8f5e8' : '#ffe8e8';
+            div.innerHTML = `
+                <strong>${result.dimension} - ${result.level}:</strong> ${result.formatCorrect ? '✅ 格式正确' : '❌ 格式错误'}<br>
+                <small>${result.startsWith}</small>
+            `;
+            resultsDiv.appendChild(div);
+        });
+    </script>
+</body>
+</html>

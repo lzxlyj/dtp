@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复详细维度分析显示问题</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .fix-section {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+        .problem-section {
+            background: #f8e8e8;
+            border-color: #dc3545;
+        }
+        .comparison {
+            display: flex;
+            gap: 20px;
+        }
+        .comparison > div {
+            flex: 1;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        .warning { color: #ffc107; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 修复详细维度分析显示问题</h1>
+        <p>此页面专门分析和修复index.html中详细维度分析文本缺失的问题</p>
+        
+        <div class="section problem-section">
+            <h2>❌ 发现的问题</h2>
+            <h3>1. 元素ID不匹配问题</h3>
+            <p>在HTML中，分析元素的ID格式是：</p>
+            <div class="code-block">
+&lt;p id="self-interest-analysis" class="text-sm text-gray-300"&gt;
+    &lt;!-- 分析内容将通过JavaScript动态插入 --&gt;
+&lt;/p&gt;
+            </div>
+            <p>但在JavaScript中查找时使用了错误的ID：</p>
+            <div class="code-block">
+// 错误的查找方式
+const analysisElement = document.getElementById(`${dimensionKey}-analysis`);
+// 这会生成: selfInterest-analysis (错误)
+// 实际需要的是: self-interest-analysis (正确)
+            </div>
+            
+            <h3>2. 维度映射问题</h3>
+            <p>JavaScript中的维度键名与HTML中的ID格式不一致：</p>
+            <div class="code-block">
+// JavaScript中的维度键名
+selfInterest, moralDisengagement, psychologicalEntitlement, selfCentered
+
+// HTML中的ID格式  
+self-interest, moral-disengagement, psychological-entitlement, self-centered
+            </div>
+        </div>
+
+        <div class="section fix-section">
+            <h2>✅ 修复方案</h2>
+            <h3>修复后的updateDimensionUI函数</h3>
+            <div class="code-block">
+function updateDimensionUI(dimensionKey, dimensionName, elementIdPrefix = null) {
+    console.log(`=== updateDimensionUI 调试 ${dimensionKey} ===`);
+    
+    const prefix = elementIdPrefix || dimensionKey;
+    // 将驼峰式命名转换为连字符命名
+    const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+    
+    console.log(`维度: ${dimensionKey}, 前缀: ${prefix}, kebabCase: ${kebabCasePrefix}`);
+    console.log(`分数: ${userScores[dimensionKey]}`);
+    
+    const scoreElement = document.getElementById(`${kebabCasePrefix}-score`);
+    const barElement = document.getElementById(`${kebabCasePrefix}-bar`);
+    
+    // 修复：分析元素也使用连字符格式
+    const analysisElement = document.getElementById(`${kebabCasePrefix}-analysis`);
+    
+    console.log(`元素查找: score=${!!scoreElement}, bar=${!!barElement}, analysis=${!!analysisElement}`);
+    console.log(`具体元素ID: ${kebabCasePrefix}-score, ${kebabCasePrefix}-bar, ${kebabCasePrefix}-analysis`);
+    
+    if (scoreElement) {
+        const score = userScores[dimensionKey];
+        scoreElement.textContent = `${score}%`;
+        console.log(`更新分数成功: ${dimensionKey} = ${score}%`);
+    } else {
+        console.log(`分数元素未找到: ${kebabCasePrefix}-score`);
+    }
+    
+    if (barElement) {
+        const score = userScores[dimensionKey];
+        barElement.style.width = `${score}%`;
+        console.log(`更新进度条成功: ${dimensionKey} = ${score}%`);
+    } else {
+        console.log(`进度条元素未找到: ${kebabCasePrefix}-bar`);
+    }
+    
+    if (analysisElement) {
+        const score = userScores[dimensionKey];
+        const level = getLevel(score);
+        analysisElement.textContent = analysisTexts[dimensionKey][level];
+        console.log(`更新分析文本成功: ${dimensionKey} - ${level}级`);
+    } else {
+        console.log(`分析元素未找到: ${kebabCasePrefix}-analysis`);
+    }
+}
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔍 维度映射表</h2>
+            <div class="comparison">
+                <div>
+                    <h3>JavaScript维度键名</h3>
+                    <div class="code-block">
+selfInterest
+greed
+machiavellianism
+moralDisengagement
+narcissism
+psychologicalEntitlement
+psychopathy
+sadism
+selfCentered
+malevolence
+                    </div>
+                </div>
+                <div>
+                    <h3>HTML元素ID格式</h3>
+                    <div class="code-block">
+self-interest
+greed
+machiavellianism-detail
+moral-disengagement
+narcissism-detail
+psychological-entitlement
+psychopathy-detail
+sadism
+self-centered
+malevolence
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 修复验证测试</h2>
+            <p>点击下面的按钮测试修复效果：</p>
+            <button onclick="testOriginalFunction()">测试原始函数</button>
+            <button onclick="testFixedFunction()">测试修复函数</button>
+            <button onclick="testElementMapping()">测试元素映射</button>
+            
+            <div id="test-results"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 修复步骤总结</h2>
+            <ol>
+                <li><strong>修改updateDimensionUI函数</strong> - 修复分析元素查找逻辑</li>
+                <li><strong>确保元素ID一致性</strong> - 所有元素使用相同的连字符格式</li>
+                <li><strong>测试所有维度</strong> - 验证每个维度的分析文本都能正确显示</li>
+                <li><strong>检查控制台日志</strong> - 确认没有元素查找失败的错误</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 模拟分析文本数据
+        const analysisTexts = {
+            selfInterest: {
+                low: "你的利己主义倾向处于较低水平（0-33%），表明你不太关注个人利益，更注重集体和他人的需求。你愿意为了更大的利益而牺牲个人利益，这种品质在团队合作和人际关系中非常宝贵。",
+                medium: "你的利己主义倾向处于中等水平（34-66%），能够在个人利益和集体利益之间找到平衡。在大多数情况下，你会考虑他人的感受，但在必要时也会为自己争取合理的利益。",
+                high: "你的利己主义倾向处于较高水平（67-100%），非常关注个人利益，倾向于优先考虑自己的需求和目标。这种特质可以帮助你在竞争激烈的环境中取得成功，但也可能影响你的人际关系和团队合作。"
+            },
+            greed: {
+                low: "你的贪婪程度处于较低水平（0-33%），对物质财富和权力没有强烈的欲望，更注重精神层面的满足。你容易感到满足，不会过分追求不属于自己的东西。",
+                medium: "你的贪婪程度处于中等水平（34-66%），对物质和权力有一定的追求，但能够控制在合理范围内。你明白努力工作的价值，也懂得适度享受生活。",
+                high: "你的贪婪程度处于较高水平（67-100%），对物质财富和权力有强烈的渴望，总是想要更多。这种强烈的欲望可以成为你前进的动力，但也可能导致你忽视其他重要的生活领域。"
+            }
+        };
+
+        // 模拟用户分数
+        const userScores = {
+            selfInterest: 65,
+            greed: 45
+        };
+
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        // 原始函数（有问题的版本）
+        function updateDimensionUIOriginal(dimensionKey, dimensionName, elementIdPrefix = null) {
+            console.log(`=== 原始函数调试 ${dimensionKey} ===`);
+            
+            const prefix = elementIdPrefix || dimensionKey;
+            const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            
+            console.log(`维度: ${dimensionKey}, 前缀: ${prefix}, kebabCase: ${kebabCasePrefix}`);
+            
+            // 原始函数的问题：分析元素使用错误的ID格式
+            const analysisElement = document.getElementById(`${dimensionKey}-analysis`);
+            
+            console.log(`分析元素查找: ${dimensionKey}-analysis = ${!!analysisElement}`);
+            
+            if (analysisElement) {
+                const score = userScores[dimensionKey];
+                const level = getLevel(score);
+                analysisElement.textContent = analysisTexts[dimensionKey][level];
+                return true;
+            } else {
+                console.log(`❌ 分析元素未找到: ${dimensionKey}-analysis`);
+                return false;
+            }
+        }
+
+        // 修复后的函数
+        function updateDimensionUIFixed(dimensionKey, dimensionName, elementIdPrefix = null) {
+            console.log(`=== 修复函数调试 ${dimensionKey} ===`);
+            
+            const prefix = elementIdPrefix || dimensionKey;
+            const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            
+            console.log(`维度: ${dimensionKey}, 前缀: ${prefix}, kebabCase: ${kebabCasePrefix}`);
+            
+            // 修复：分析元素也使用连字符格式
+            const analysisElement = document.getElementById(`${kebabCasePrefix}-analysis`);
+            
+            console.log(`分析元素查找: ${kebabCasePrefix}-analysis = ${!!analysisElement}`);
+            
+            if (analysisElement) {
+                const score = userScores[dimensionKey];
+                const level = getLevel(score);
+                analysisElement.textContent = analysisTexts[dimensionKey][level];
+                return true;
+            } else {
+                console.log(`❌ 分析元素未找到: ${kebabCasePrefix}-analysis`);
+                return false;
+            }
+        }
+
+        function testOriginalFunction() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h3>原始函数测试结果</h3>';
+            
+            // 创建模拟元素
+            const testDiv = document.createElement('div');
+            testDiv.innerHTML = `
+                <p id="self-interest-analysis">原始文本</p>
+                <p id="greed-analysis">原始文本</p>
+            `;
+            document.body.appendChild(testDiv);
+            
+            let successCount = 0;
+            Object.keys(userScores).forEach(dimensionKey => {
+                const success = updateDimensionUIOriginal(dimensionKey);
+                if (success) {
+                    results.innerHTML += `<div class="success">✅ ${dimensionKey}: 成功</div>`;
+                    successCount++;
+                } else {
+                    results.innerHTML += `<div class="error">❌ ${dimensionKey}: 失败</div>`;
+                }
+            });
+            
+            results.innerHTML += `<div class="${successCount === Object.keys(userScores).length ? 'success' : 'error'}">
+                总计: ${successCount}/${Object.keys(userScores).length} 成功
+            </div>`;
+            
+            document.body.removeChild(testDiv);
+        }
+
+        function testFixedFunction() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h3>修复函数测试结果</h3>';
+            
+            // 创建模拟元素
+            const testDiv = document.createElement('div');
+            testDiv.innerHTML = `
+                <p id="self-interest-analysis">原始文本</p>
+                <p id="greed-analysis">原始文本</p>
+            `;
+            document.body.appendChild(testDiv);
+            
+            let successCount = 0;
+            Object.keys(userScores).forEach(dimensionKey => {
+                const success = updateDimensionUIFixed(dimensionKey);
+                if (success) {
+                    results.innerHTML += `<div class="success">✅ ${dimensionKey}: 成功</div>`;
+                    successCount++;
+                } else {
+                    results.innerHTML += `<div class="error">❌ ${dimensionKey}: 失败</div>`;
+                }
+            });
+            
+            results.innerHTML += `<div class="${successCount === Object.keys(userScores).length ? 'success' : 'error'}">
+                总计: ${successCount}/${Object.keys(userScores).length} 成功
+            </div>`;
+            
+            document.body.removeChild(testDiv);
+        }
+
+        function testElementMapping() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h3>元素映射测试</h3>';
+            
+            const dimensions = ['selfInterest', 'greed', 'moralDisengagement'];
+            
+            dimensions.forEach(dimensionKey => {
+                const prefix = dimensionKey;
+                const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+                
+                results.innerHTML += `
+                    <div>
+                        <strong>${dimensionKey}</strong> → ${kebabCasePrefix}-analysis
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

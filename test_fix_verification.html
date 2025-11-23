@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .dimension {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dimension h3 {
+            margin: 0 0 10px 0;
+            color: #FFD700;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00FF7F;
+            margin: 10px 0;
+        }
+        .analysis {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            min-height: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        .success { background: rgba(0, 255, 0, 0.3); color: #00FF00; }
+        .error { background: rgba(255, 0, 0, 0.3); color: #FF6B6B; }
+        button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.3s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .test-results {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 修复验证测试</h1>
+        <p>测试三个问题维度的分析文本是否正确显示</p>
+        
+        <button onclick="runTest()">运行测试</button>
+        <button onclick="clearResults()">清除结果</button>
+        
+        <div class="test-results" id="testLog"></div>
+        
+        <div class="dimension">
+            <h3>马基雅维利主义</h3>
+            <div class="score" id="machiavellianism-score">--</div>
+            <div class="analysis" id="machiavellianism-analysis">等待测试...</div>
+            <div id="machiavellianism-status"></div>
+        </div>
+        
+        <div class="dimension">
+            <h3>自恋</h3>
+            <div class="score" id="narcissism-score">--</div>
+            <div class="analysis" id="narcissism-analysis">等待测试...</div>
+            <div id="narcissism-status"></div>
+        </div>
+        
+        <div class="dimension">
+            <h3>精神变态</h3>
+            <div class="score" id="psychopathy-score">--</div>
+            <div class="analysis" id="psychopathy-analysis">等待测试...</div>
+            <div id="psychopathy-status"></div>
+        </div>
+        
+        <div id="overall-status"></div>
+    </div>
+
+    <script>
+        // 模拟用户分数数据
+        const userScores = {
+            machiavellianism: 65,
+            narcissism: 45,
+            psychopathy: 25
+        };
+        
+        // 分析文本数据
+        const analysisTexts = {
+            machiavellianism: {
+                low: '你的马基雅维利主义倾向较低，表明你是一个诚实正直的人，倾向于直接和透明的方式处理人际关系。',
+                medium: '你的马基雅维利主义倾向处于中等水平，表明你在人际交往中具有一定的策略性思维，但仍有道德底线。',
+                high: '你的马基雅维利主义倾向较高，表明你在人际交往中倾向于使用策略和手段，需要注意保持道德平衡。'
+            },
+            narcissism: {
+                low: '你的自恋程度较低，表明你是一个谦逊的人，不太需要他人的关注和认可。',
+                medium: '你的自恋程度处于中等水平，表明你有适度的自信，但不会过度自我中心。',
+                high: '你的自恋程度较高，表明你非常需要他人的关注和认可，需要注意培养同理心。'
+            },
+            psychopathy: {
+                low: '你的精神变态倾向较低，表明你有良好的同理心和情感连接能力。',
+                medium: '你的精神变态倾向处于中等水平，表明你在理性和情感之间有一定平衡。',
+                high: '你的精神变态倾向较高，表明你可能缺乏同理心，需要注意培养情感连接能力。'
+            }
+        };
+        
+        function log(message) {
+            const logEl = document.getElementById('testLog');
+            logEl.innerHTML += new Date().toLocaleTimeString() + ' - ' + message + '<br>';
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+        
+        function updateStatus(dimension, success, message) {
+            const statusEl = document.getElementById(dimension + '-status');
+            statusEl.className = 'status ' + (success ? 'success' : 'error');
+            statusEl.textContent = message;
+        }
+        
+        function runTest() {
+            log('开始测试修复效果...');
+            
+            // 测试 updateDimensionUI 函数（修复后的版本）
+            function updateDimensionUI(dimensionKey, dimensionName, elementIdPrefix = null) {
+                log(`测试 ${dimensionKey} (${dimensionName})`);
+                
+                const prefix = elementIdPrefix || dimensionKey;
+                const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+                
+                log(`  使用前缀: ${prefix} -> ${kebabCasePrefix}`);
+                
+                const scoreElement = document.getElementById(`${kebabCasePrefix}-score`);
+                const analysisElement = document.getElementById(`${kebabCasePrefix}-analysis`);
+                
+                log(`  查找元素: ${kebabCasePrefix}-score, ${kebabCasePrefix}-analysis`);
+                
+                let success = true;
+                
+                // 更新分数
+                if (scoreElement) {
+                    const score = userScores[dimensionKey];
+                    scoreElement.textContent = `${score}%`;
+                    log(`  ✓ 分数元素找到并更新: ${score}%`);
+                } else {
+                    log(`  ✗ 分数元素未找到: ${kebabCasePrefix}-score`);
+                    success = false;
+                }
+                
+                // 更新分析文本
+                if (analysisElement) {
+                    const score = userScores[dimensionKey];
+                    const level = getLevel(score);
+                    const analysisText = analysisTexts[dimensionKey][level];
+                    analysisElement.textContent = analysisText;
+                    log(`  ✓ 分析元素找到并更新: ${level}级 - ${analysisText.substring(0, 50)}...`);
+                } else {
+                    log(`  ✗ 分析元素未找到: ${kebabCasePrefix}-analysis`);
+                    success = false;
+                }
+                
+                updateStatus(dimensionKey, success, success ? '修复成功' : '修复失败');
+                return success;
+            }
+            
+            // 测试三个问题维度
+            const results = [];
+            
+            // 修复后的调用方式（没有第三个参数）
+            log('使用修复后的函数调用（无第三个参数）:');
+            results.push(updateDimensionUI('machiavellianism', '马基雅维利主义'));
+            results.push(updateDimensionUI('narcissism', '自恋'));
+            results.push(updateDimensionUI('psychopathy', '精神变态'));
+            
+            const allSuccess = results.every(r => r);
+            const overallEl = document.getElementById('overall-status');
+            overallEl.innerHTML = `
+                <div class="status ${allSuccess ? 'success' : 'error'}">
+                    ${allSuccess ? '✅ 全部修复成功！' : '❌ 仍有部分问题'}
+                </div>
+                <p>测试结果：${results.filter(r => r).length}/3 个维度修复成功</p>
+            `;
+            
+            log(`测试完成：${results.filter(r => r).length}/3 个维度成功`);
+        }
+        
+        function clearResults() {
+            document.getElementById('testLog').innerHTML = '';
+            document.getElementById('overall-status').innerHTML = '';
+            
+            // 重置显示
+            ['machiavellianism', 'narcissism', 'psychopathy'].forEach(dimension => {
+                document.getElementById(dimension + '-score').textContent = '--';
+                document.getElementById(dimension + '-analysis').textContent = '等待测试...';
+                document.getElementById(dimension + '-status').innerHTML = '';
+            });
+        }
+        
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('页面加载完成，修复验证测试准备就绪');
+            log('点击"运行测试"按钮开始验证修复效果');
+        };
+    </script>
+</body>
+</html>

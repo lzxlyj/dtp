@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>详细分析功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>详细分析功能逻辑验证</h1>
+    
+    <div class="test-section">
+        <h2>1. 元素存在性检查</h2>
+        <div id="machiavellianism-detail-percentage-text">百分比文本</div>
+        <div id="machiavellianism-detail-suggestions">建议列表</div>
+        <div id="narcissism-detail-percentage-text">百分比文本</div>
+        <div id="narcissism-detail-suggestions">建议列表</div>
+        <div id="psychopathy-detail-percentage-text">百分比文本</div>
+        <div id="psychopathy-detail-suggestions">建议列表</div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 函数逻辑测试</h2>
+        <button onclick="testFunctions()">运行测试</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 完整流程模拟</h2>
+        <button onclick="simulateFullProcess()">模拟完整流程</button>
+        <div id="simulation-results"></div>
+    </div>
+
+    <script>
+        // 复制核心函数
+        function getDimensionChineseName(dimensionKey) {
+            const names = {
+                'machiavellianism': '马基雅维利主义',
+                'narcissism': '自恋',
+                'psychopathy': '精神变态'
+            };
+            return names[dimensionKey] || dimensionKey;
+        }
+
+        function getLevelText(level) {
+            const levelTexts = {
+                'low': '低水平',
+                'medium': '中等水平',
+                'high': '高水平'
+            };
+            return levelTexts[level] || level;
+        }
+
+        function getSuggestions(dimensionKey, level) {
+            const suggestions = {
+                'machiavellianism': {
+                    'low': ['您通常比较直接和诚实', '您倾向于相信他人', '您不太使用操控手段'],
+                    'medium': ['适度使用策略性思维', '注意保持真诚', '平衡个人与他人利益'],
+                    'high': ['注意操控行为对他人的影响', '学习更健康的沟通方式', '考虑寻求专业建议']
+                },
+                'narcissism': {
+                    'low': ['您通常比较谦逊', '您关注他人需求', '您不太需要外界认可'],
+                    'medium': ['保持适度的自信', '继续关心他人感受', '平衡自我与他人需求'],
+                    'high': ['学习谦逊和同理心', '关注他人需求', '避免过度自我中心']
+                },
+                'psychopathy': {
+                    'low': ['您富有同理心', '您关心他人感受', '您有正常的情感反应'],
+                    'medium': ['继续发展同理心', '关注情感表达', '保持健康的情感连接'],
+                    'high': ['学习理解他人感受', '发展同理心', '考虑寻求专业帮助']
+                }
+            };
+            return suggestions[dimensionKey]?.[level] || ['暂无具体建议'];
+        }
+
+        function updateDetailedAnalysis(dimensionKey, score, level) {
+            console.log(`updateDetailedAnalysis called: ${dimensionKey}, ${score}, ${level}`);
+            
+            const percentageText = document.getElementById(`${dimensionKey}-detail-percentage-text`);
+            const suggestionsList = document.getElementById(`${dimensionKey}-detail-suggestions`);
+            
+            if (!percentageText) {
+                console.error(`Element not found: ${dimensionKey}-detail-percentage-text`);
+                return false;
+            }
+            if (!suggestionsList) {
+                console.error(`Element not found: ${dimensionKey}-detail-suggestions`);
+                return false;
+            }
+            
+            const dimensionName = getDimensionChineseName(dimensionKey);
+            const levelText = getLevelText(level);
+            const suggestions = getSuggestions(dimensionKey, level);
+            
+            percentageText.textContent = `${dimensionName}：${score}分（${levelText}）`;
+            
+            suggestionsList.innerHTML = '';
+            suggestions.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.textContent = suggestion;
+                suggestionsList.appendChild(li);
+            });
+            
+            console.log(`Updated ${dimensionKey} with score ${score}, level ${level}`);
+            return true;
+        }
+
+        function testFunctions() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+            
+            let testsPassed = 0;
+            let totalTests = 0;
+            
+            // 测试1：函数存在性
+            totalTests++;
+            if (typeof updateDetailedAnalysis === 'function') {
+                results.innerHTML += '<div class="result success">✓ updateDetailedAnalysis 函数存在</div>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<div class="result error">✗ updateDetailedAnalysis 函数不存在</div>';
+            }
+            
+            // 测试2：元素获取
+            const dimensions = ['machiavellianism', 'narcissism', 'psychopathy'];
+            dimensions.forEach(dim => {
+                totalTests++;
+                const percentageEl = document.getElementById(`${dim}-detail-percentage-text`);
+                const suggestionsEl = document.getElementById(`${dim}-detail-suggestions`);
+                
+                if (percentageEl && suggestionsEl) {
+                    results.innerHTML += `<div class="result success">✓ ${dim} 元素存在</div>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<div class="result error">✗ ${dim} 元素不存在</div>`;
+                }
+            });
+            
+            // 测试3：函数调用
+            dimensions.forEach(dim => {
+                totalTests++;
+                const success = updateDetailedAnalysis(dim, 50, 'medium');
+                if (success) {
+                    results.innerHTML += `<div class="result success">✓ ${dim} 函数调用成功</div>`;
+                    testsPassed++;
+                } else {
+                    results.innerHTML += `<div class="result error">✗ ${dim} 函数调用失败</div>`;
+                }
+            });
+            
+            results.innerHTML += `<div class="result"><strong>测试结果：${testsPassed}/${totalTests} 通过</strong></div>`;
+        }
+
+        function simulateFullProcess() {
+            const results = document.getElementById('simulation-results');
+            results.innerHTML = '<div class="result">开始模拟完整流程...</div>';
+            
+            // 模拟用户分数数据
+            const userScores = {
+                machiavellianism: { score: 65, level: 'medium' },
+                narcissism: { score: 45, level: 'low' },
+                psychopathy: { score: 80, level: 'high' }
+            };
+            
+            setTimeout(() => {
+                Object.keys(userScores).forEach(dimensionKey => {
+                    const { score, level } = userScores[dimensionKey];
+                    const success = updateDetailedAnalysis(dimensionKey, score, level);
+                    
+                    if (success) {
+                        results.innerHTML += `<div class="result success">✓ ${dimensionKey}: ${score}分 (${level}) - 更新成功</div>`;
+                    } else {
+                        results.innerHTML += `<div class="result error">✗ ${dimensionKey}: ${score}分 (${level}) - 更新失败</div>`;
+                    }
+                });
+                
+                results.innerHTML += '<div class="result"><strong>模拟完成！</strong></div>';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>核心维度同步验证 - 马基雅维利主义、自恋、精神变态</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .core-dimension { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin: 15px 0; padding: 20px; border-radius: 10px; }
+        .test-controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+        .test-btn { padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .test-btn:hover { background: #218838; transform: translateY(-1px); }
+        .test-btn.core { background: #dc3545; }
+        .test-btn.core:hover { background: #c82333; }
+        .sync-status { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; padding: 15px; border-radius: 8px; }
+        .sync-status.success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .sync-status.error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .sync-status.warning { background: #fff3cd; border: 1px solid #ffeaa7; }
+        .score-comparison { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .score-box { text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; }
+        .score-box h4 { margin: 0 0 10px 0; font-size: 14px; opacity: 0.9; }
+        .score-value { font-size: 24px; font-weight: bold; margin: 5px 0; }
+        .score-label { font-size: 12px; opacity: 0.8; }
+        .progress-container { margin: 10px 0; }
+        .progress-bar { width: 100%; height: 12px; background: rgba(255,255,255,0.2); border-radius: 6px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #28a745; border-radius: 6px; transition: width 0.3s ease; }
+        .test-log { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin: 15px 0; font-family: monospace; font-size: 13px; max-height: 250px; overflow-y: auto; }
+        .scenario-selector { margin: 20px 0; }
+        .scenario-btn { padding: 8px 16px; margin: 5px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .scenario-btn:hover { background: #5a6268; }
+        .scenario-btn.active { background: #007bff; }
+        .validation-summary { background: #e3f2fd; border: 1px solid #2196f3; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .validation-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+        .validation-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔥 核心维度同步验证</h1>
+        <p>专门验证马基雅维利主义、自恋、精神变态三大核心维度的同步显示</p>
+        
+        <div class="scenario-selector">
+            <h3>🎭 预设测试场景</h3>
+            <button class="scenario-btn" onclick="loadScenario('normal')">正常分布</button>
+            <button class="scenario-btn" onclick="loadScenario('high_narcissism')">高自恋</button>
+            <button class="scenario-btn" onclick="loadScenario('high_machiavellianism')">高马基</button>
+            <button class="scenario-btn" onclick="loadScenario('high_psychopathy')">高精神</button>
+            <button class="scenario-btn" onclick="loadScenario('mixed')">混合高分</button>
+            <button class="scenario-btn" onclick="loadScenario('low_all')">全低分</button>
+        </div>
+
+        <div class="test-controls">
+            <button class="test-btn core" onclick="runCoreDimensionTest()">🎯 运行核心维度测试</button>
+            <button class="test-btn" onclick="testSpecificScenario()">🧪 自定义场景测试</button>
+            <button class="test-btn" onclick="runAutomatedSequence()">⚡ 自动化序列测试</button>
+            <button class="test-btn" onclick="clearAllResults()">🗑️ 清除结果</button>
+        </div>
+
+        <!-- 马基雅维利主义 -->
+        <div class="core-dimension">
+            <h3>🎭 马基雅维利主义</h3>
+            <div class="score-comparison">
+                <div class="score-box">
+                    <h4>期望分数</h4>
+                    <div class="score-value" id="machiavellianism-expected">0%</div>
+                    <div class="score-label">目标值</div>
+                </div>
+                <div class="score-box">
+                    <h4>概览区域</h4>
+                    <div class="score-value" id="machiavellianism-overview">0%</div>
+                    <div class="score-label">主页面显示</div>
+                </div>
+                <div class="score-box">
+                    <h4>详细分析</h4>
+                    <div class="score-value" id="machiavellianism-detail">0%</div>
+                    <div class="score-label">详细页面显示</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="machiavellianism-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="sync-status" id="machiavellianism-status">
+                <span>🔄 等待测试...</span>
+                <span id="machiavellianism-sync-indicator">⚪</span>
+            </div>
+        </div>
+
+        <!-- 自恋 -->
+        <div class="core-dimension">
+            <h3>👑 自恋</h3>
+            <div class="score-comparison">
+                <div class="score-box">
+                    <h4>期望分数</h4>
+                    <div class="score-value" id="narcissism-expected">0%</div>
+                    <div class="score-label">目标值</div>
+                </div>
+                <div class="score-box">
+                    <h4>概览区域</h4>
+                    <div class="score-value" id="narcissism-overview">0%</div>
+                    <div class="score-label">主页面显示</div>
+                </div>
+                <div class="score-box">
+                    <h4>详细分析</h4>
+                    <div class="score-value" id="narcissism-detail">0%</div>
+                    <div class="score-label">详细页面显示</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="narcissism-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="sync-status" id="narcissism-status">
+                <span>🔄 等待测试...</span>
+                <span id="narcissism-sync-indicator">⚪</span>
+            </div>
+        </div>
+
+        <!-- 精神变态 -->
+        <div class="core-dimension">
+            <h3>🦈 精神变态</h3>
+            <div class="score-comparison">
+                <div class="score-box">
+                    <h4>期望分数</h4>
+                    <div class="score-value" id="psychopathy-expected">0%</div>
+                    <div class="score-label">目标值</div>
+                </div>
+                <div class="score-box">
+                    <h4>概览区域</h4>
+                    <div class="score-value" id="psychopathy-overview">0%</div>
+                    <div class="score-label">主页面显示</div>
+                </div>
+                <div class="score-box">
+                    <h4>详细分析</h4>
+                    <div class="score-value" id="psychopathy-detail">0%</div>
+                    <div class="score-label">详细页面显示</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="psychopathy-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="sync-status" id="psychopathy-status">
+                <span>🔄 等待测试...</span>
+                <span id="psychopathy-sync-indicator">⚪</span>
+            </div>
+        </div>
+
+        <div class="validation-summary" id="validation-summary">
+            <h3>📊 验证总结</h3>
+            <div id="validation-items"></div>
+        </div>
+
+        <div class="test-log" id="test-log"></div>
+    </div>
+
+    <script>
+        const coreDimensions = [
+            { key: 'machiavellianism', name: '马基雅维利主义' },
+            { key: 'narcissism', name: '自恋' },
+            { key: 'psychopathy', name: '精神变态' }
+        ];
+
+        const scenarios = {
+            normal: { machiavellianism: 45, narcissism: 60, psychopathy: 35 },
+            high_narcissism: { machiavellianism: 40, narcissism: 85, psychopathy: 30 },
+            high_machiavellianism: { machiavellianism: 80, narcissism: 50, psychopathy: 45 },
+            high_psychopathy: { machiavellianism: 55, narcissism: 40, psychopathy: 75 },
+            mixed: { machiavellianism: 70, narcissism: 75, psychopathy: 65 },
+            low_all: { machiavellianism: 15, narcissism: 20, psychopathy: 10 }
+        };
+
+        function log(message) {
+            const logElement = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${timestamp}] ${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function loadScenario(scenarioName, event = null) {
+            // 重置按钮状态
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            
+            const scenario = scenarios[scenarioName];
+            log(`加载场景: ${scenarioName} - 马基:${scenario.machiavellianism}% 自恋:${scenario.narcissism}% 精神:${scenario.psychopathy}%`);
+            
+            // 更新期望值显示
+            coreDimensions.forEach(dim => {
+                document.getElementById(`${dim.key}-expected`).textContent = `${scenario[dim.key]}%`;
+            });
+        }
+
+        function updateDimensionDisplay(dimensionKey, expectedScore, overviewScore, detailScore) {
+            // 更新显示值
+            document.getElementById(`${dimensionKey}-overview`).textContent = `${overviewScore}%`;
+            document.getElementById(`${dimensionKey}-detail`).textContent = `${detailScore}%`;
+            document.getElementById(`${dimensionKey}-progress`).style.width = `${detailScore}%`;
+            
+            // 计算同步状态
+            let statusText, statusClass, indicator;
+            
+            if (overviewScore === expectedScore && detailScore === expectedScore) {
+                statusText = '✅ 完全同步 - 概览和详细分析显示一致';
+                statusClass = 'success';
+                indicator = '🟢';
+                log(`✅ ${dimensionKey}: 概览(${overviewScore}%) + 详细(${detailScore}%) = 期望(${expectedScore}%) ✨`);
+            } else if (overviewScore === expectedScore) {
+                statusText = `⚠️ 部分同步 - 概览正确，详细分析显示错误`;
+                statusClass = 'warning';
+                indicator = '🟡';
+                log(`⚠️ ${dimensionKey}: 概览正确(${overviewScore}%)，但详细分析错误(${detailScore}%)，期望${expectedScore}%`);
+            } else if (detailScore === expectedScore) {
+                statusText = `⚠️ 部分同步 - 详细分析正确，概览显示错误`;
+                statusClass = 'warning';
+                indicator = '🟡';
+                log(`⚠️ ${dimensionKey}: 详细分析正确(${detailScore}%)，但概览错误(${overviewScore}%)，期望${expectedScore}%`);
+            } else {
+                statusText = `❌ 不同步 - 概览和详细分析都显示错误`;
+                statusClass = 'error';
+                indicator = '🔴';
+                log(`❌ ${dimensionKey}: 概览(${overviewScore}%)和详细分析(${detailScore}%)都不同步，期望${expectedScore}%`);
+            }
+            
+            // 更新状态显示
+            const statusElement = document.getElementById(`${dimensionKey}-status`);
+            statusElement.className = `sync-status ${statusClass}`;
+            statusElement.innerHTML = `
+                <span>${statusText}</span>
+                <span id="${dimensionKey}-sync-indicator">${indicator}</span>
+            `;
+            
+            return { dimensionKey, expectedScore, overviewScore, detailScore, isSynced: statusClass === 'success' };
+        }
+
+        function simulateActualUIUpdate(testScores) {
+            // 模拟真实的UI更新逻辑
+            coreDimensions.forEach(dim => {
+                const score = testScores[dim.key];
+                
+                // 模拟概览区域更新
+                const overviewElement = document.getElementById(`${dim.key}-score`);
+                if (overviewElement) {
+                    overviewElement.textContent = score;
+                    // 同时更新等级显示
+                    const levelElement = document.getElementById(`${dim.key}-level`);
+                    if (levelElement) {
+                        const level = score < 33 ? '低' : score < 66 ? '中' : '高';
+                        levelElement.textContent = level;
+                    }
+                }
+                
+                // 模拟详细分析区域更新
+                const detailScoreElement = document.getElementById(`detail-${dim.key}-score`);
+                const detailBarElement = document.getElementById(`detail-${dim.key}-bar`);
+                const detailAnalysisElement = document.getElementById(`detail-${dim.key}-analysis`);
+                
+                if (detailScoreElement) detailScoreElement.textContent = `${score}%`;
+                if (detailBarElement) detailBarElement.style.width = `${score}%`;
+                if (detailAnalysisElement) {
+                    const level = score < 33 ? 'low' : score < 66 ? 'medium' : 'high';
+                    const analysisTexts = {
+                        machiavellianism: {
+                            low: '你的马基雅维利主义倾向较低，表明你倾向于诚实、直接的交往方式。',
+                            medium: '你的马基雅维利主义倾向处于中等水平，在策略性和诚实之间保持平衡。',
+                            high: '你的马基雅维利主义倾向较高，可能倾向于使用策略和操控来达到目的。'
+                        },
+                        narcissism: {
+                            low: '你的自恋程度较低，表明你比较谦逊，不太需要他人的赞美。',
+                            medium: '你的自恋程度处于中等水平，有适度的自信和自尊。',
+                            high: '你的自恋程度较高，可能比较关注自我形象和他人对你的看法。'
+                        },
+                        psychopathy: {
+                            low: '你的精神变态特质较低，表明你有良好的同理心和情感连接能力。',
+                            medium: '你的精神变态特质处于中等水平，在理性和情感之间相对平衡。',
+                            high: '你的精神变态特质较高，可能缺乏同理心且比较冲动。'
+                        }
+                    };
+                    detailAnalysisElement.textContent = analysisTexts[dim.key][level];
+                }
+            });
+        }
+
+        function runCoreDimensionTest() {
+            log('🎯 开始核心维度同步测试...');
+            
+            // 获取当前场景或随机分数
+            let testScores;
+            const activeScenario = document.querySelector('.scenario-btn.active');
+            if (activeScenario) {
+                const scenarioName = activeScenario.textContent.trim();
+                const scenarioKey = Object.keys(scenarios).find(key => 
+                    scenarios[key] && document.querySelector(`button[onclick*="${key}"]`)?.classList.contains('active')
+                );
+                testScores = scenarioKey ? scenarios[scenarioKey] : generateRandomCoreScores();
+            } else {
+                testScores = generateRandomCoreScores();
+            }
+            
+            log(`测试分数 - 马基:${testScores.machiavellianism}% 自恋:${testScores.narcissism}% 精神:${testScores.psychopathy}%`);
+            
+            // 模拟UI更新
+            simulateActualUIUpdate(testScores);
+            
+            // 验证同步状态
+            const results = [];
+            coreDimensions.forEach(dim => {
+                const expectedScore = testScores[dim.key];
+                
+                // 获取实际显示值
+                const overviewElement = document.getElementById(`${dim.key}-score`);
+                const detailElement = document.getElementById(`detail-${dim.key}-score`);
+                
+                const overviewScore = overviewElement ? parseInt(overviewElement.textContent) : 0;
+                const detailScore = detailElement ? parseInt(detailElement.textContent.replace('%', '')) : 0;
+                
+                const result = updateDimensionDisplay(dim.key, expectedScore, overviewScore, detailScore);
+                results.push(result);
+            });
+            
+            // 更新验证总结
+            updateValidationSummary(results);
+            
+            // 总体结果
+            const totalTests = results.length;
+            const passedTests = results.filter(r => r.isSynced).length;
+            const successRate = (passedTests / totalTests * 100).toFixed(1);
+            
+            log(`🎯 核心维度测试完成: ${passedTests}/${totalTests} 通过 (${successRate}%)`);
+            
+            if (successRate == 100) {
+                log('✨ 所有核心维度完全同步！修复成功！');
+            } else {
+                log('⚠️ 部分核心维度存在同步问题，需要进一步修复');
+            }
+        }
+
+        function generateRandomCoreScores() {
+            return {
+                machiavellianism: Math.floor(Math.random() * 100),
+                narcissism: Math.floor(Math.random() * 100),
+                psychopathy: Math.floor(Math.random() * 100)
+            };
+        }
+
+        function updateValidationSummary(results) {
+            const summaryElement = document.getElementById('validation-items');
+            summaryElement.innerHTML = '';
+            
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'validation-item';
+                item.innerHTML = `
+                    <span><strong>${result.dimensionKey}:</strong> 期望 ${result.expectedScore}%</span>
+                    <span style="color: ${result.isSynced ? 'green' : 'red'};">
+                        ${result.isSynced ? '✅ 同步' : '❌ 不同步'}
+                    </span>
+                `;
+                summaryElement.appendChild(item);
+            });
+        }
+
+        function testSpecificScenario() {
+            const customScores = prompt('请输入自定义分数 (格式: 马基,自恋,精神):', '60,75,40');
+            if (customScores) {
+                const scores = customScores.split(',').map(s => parseInt(s.trim()));
+                if (scores.length === 3 && scores.every(s => !isNaN(s) && s >= 0 && s <= 100)) {
+                    const testScores = {
+                        machiavellianism: scores[0],
+                        narcissism: scores[1],
+                        psychopathy: scores[2]
+                    };
+                    log(`🧪 自定义场景测试: 马基${scores[0]}% 自恋${scores[1]}% 精神${scores[2]}%`);
+                    simulateActualUIUpdate(testScores);
+                    
+                    const results = [];
+                    coreDimensions.forEach(dim => {
+                        const overviewElement = document.getElementById(`${dim.key}-score`);
+                        const detailElement = document.getElementById(`detail-${dim.key}-score`);
+                        const overviewScore = overviewElement ? parseInt(overviewElement.textContent) : 0;
+                        const detailScore = detailElement ? parseInt(detailElement.textContent.replace('%', '')) : 0;
+                        const result = updateDimensionDisplay(dim.key, testScores[dim.key], overviewScore, detailScore);
+                        results.push(result);
+                    });
+                    updateValidationSummary(results);
+                } else {
+                    alert('请输入有效的分数 (0-100之间的数字，用逗号分隔)');
+                }
+            }
+        }
+
+        function runAutomatedSequence() {
+            log('⚡ 开始自动化序列测试...');
+            const sequence = [
+                { name: '低分场景', scores: { machiavellianism: 20, narcissism: 15, psychopathy: 10 } },
+                { name: '中分场景', scores: { machiavellianism: 50, narcissism: 55, psychopathy: 45 } },
+                { name: '高分场景', scores: { machiavellianism: 80, narcissism: 85, psychopathy: 75 } },
+                { name: '混合场景', scores: { machiavellianism: 75, narcissism: 40, psychopathy: 60 } }
+            ];
+            
+            let index = 0;
+            function runNextTest() {
+                if (index < sequence.length) {
+                    const test = sequence[index];
+                    log(`⚡ 序列 ${index + 1}/${sequence.length}: ${test.name}`);
+                    simulateActualUIUpdate(test.scores);
+                    
+                    setTimeout(() => {
+                        const results = [];
+                        coreDimensions.forEach(dim => {
+                            const overviewElement = document.getElementById(`${dim.key}-score`);
+                            const detailElement = document.getElementById(`detail-${dim.key}-score`);
+                            const overviewScore = overviewElement ? parseInt(overviewElement.textContent) : 0;
+                            const detailScore = detailElement ? parseInt(detailElement.textContent.replace('%', '')) : 0;
+                            const result = updateDimensionDisplay(dim.key, test.scores[dim.key], overviewScore, detailScore);
+                            results.push(result);
+                        });
+                        updateValidationSummary(results);
+                        
+                        index++;
+                        if (index < sequence.length) {
+                            setTimeout(runNextTest, 1000);
+                        } else {
+                            log('✅ 自动化序列测试完成！');
+                        }
+                    }, 500);
+                }
+            }
+            
+            runNextTest();
+        }
+
+        function clearAllResults() {
+            coreDimensions.forEach(dim => {
+                document.getElementById(`${dim.key}-expected`).textContent = '0%';
+                document.getElementById(`${dim.key}-overview`).textContent = '0%';
+                document.getElementById(`${dim.key}-detail`).textContent = '0%';
+                document.getElementById(`${dim.key}-progress`).style.width = '0%';
+                
+                const statusElement = document.getElementById(`${dim.key}-status`);
+                statusElement.className = 'sync-status';
+                statusElement.innerHTML = `
+                    <span>🔄 等待测试...</span>
+                    <span id="${dim.key}-sync-indicator">⚪</span>
+                `;
+            });
+            
+            document.getElementById('validation-items').innerHTML = '';
+            document.getElementById('test-log').innerHTML = '';
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            
+            log('🗑️ 所有结果已清除');
+        }
+
+        // 页面加载时运行默认测试
+        window.onload = function() {
+            log('🔥 核心维度同步验证系统已加载');
+            log('📊 准备验证马基雅维利主义、自恋、精神变态的同步显示...');
+            
+            // 加载默认场景
+            loadScenario('normal');
+            const normalBtn = document.querySelector('button[onclick*="normal"]');
+            if (normalBtn) normalBtn.classList.add('active');
+            
+            setTimeout(() => {
+                runCoreDimensionTest();
+            }, 1500);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能测试验证</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .pass { color: green; }
+        .fail { color: red; }
+        .test-result { margin: 5px 0; padding: 5px; background: #f5f5f5; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>综合分数测试页面功能验证</h1>
+    
+    <div class="test-section">
+        <h2>1. 变量定义测试</h2>
+        <div id="variable-test"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 分析文本完整性测试</h2>
+        <div id="text-completeness-test"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 分数等级判断测试</h2>
+        <div id="score-level-test"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 维度名称映射测试</h2>
+        <div id="dimension-name-test"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. 总体测试结果</h2>
+        <div id="overall-result"></div>
+    </div>
+
+    <!-- 引入相关脚本 -->
+    <script src="auto_test_scores.js"></script>
+    
+    <script>
+        // 测试函数
+        function runAllTests() {
+            let overallResults = [];
+            
+            // 1. 变量定义测试
+            const variableTestResults = testVariableDefinitions();
+            document.getElementById('variable-test').innerHTML = variableTestResults.html;
+            overallResults.push(variableTestResults.passed);
+            
+            // 2. 分析文本完整性测试
+            const textTestResults = testTextCompleteness();
+            document.getElementById('text-completeness-test').innerHTML = textTestResults.html;
+            overallResults.push(textTestResults.passed);
+            
+            // 3. 分数等级判断测试
+            const scoreTestResults = testScoreLevelJudgment();
+            document.getElementById('score-level-test').innerHTML = scoreTestResults.html;
+            overallResults.push(scoreTestResults.passed);
+            
+            // 4. 维度名称映射测试
+            const nameTestResults = testDimensionNames();
+            document.getElementById('dimension-name-test').innerHTML = nameTestResults.html;
+            overallResults.push(nameTestResults.passed);
+            
+            // 5. 总体结果
+            const allPassed = overallResults.every(result => result);
+            const overallHtml = `
+                <div class="test-result ${allPassed ? 'pass' : 'fail'}">
+                    <strong>总体测试: ${allPassed ? '✅ 全部通过' : '❌ 部分失败'}</strong>
+                </div>
+                <div>通过测试: ${overallResults.filter(r => r).length}/${overallResults.length}</div>
+            `;
+            document.getElementById('overall-result').innerHTML = overallHtml;
+        }
+        
+        // 1. 变量定义测试
+        function testVariableDefinitions() {
+            let results = [];
+            let html = '';
+            
+            // 测试 dimensionNames
+            const dimensionNamesExists = typeof window.dimensionNames !== 'undefined';
+            results.push(dimensionNamesExists);
+            html += `<div class="test-result ${dimensionNamesExists ? 'pass' : 'fail'}">dimensionNames 定义: ${dimensionNamesExists ? '✅' : '❌'}</div>`;
+            
+            // 测试 analysisTexts
+            const analysisTextsExists = typeof window.analysisTexts !== 'undefined';
+            results.push(analysisTextsExists);
+            html += `<div class="test-result ${analysisTextsExists ? 'pass' : 'fail'}">analysisTexts 定义: ${analysisTextsExists ? '✅' : '❌'}</div>`;
+            
+            // 测试维度数量
+            if (dimensionNamesExists) {
+                const dimensionCount = Object.keys(window.dimensionNames).length;
+                const correctCount = dimensionCount === 10;
+                results.push(correctCount);
+                html += `<div class="test-result ${correctCount ? 'pass' : 'fail'}">维度数量: ${dimensionCount}/10 ${correctCount ? '✅' : '❌'}</div>`;
+            }
+            
+            const passed = results.every(r => r);
+            return { passed, html };
+        }
+        
+        // 2. 分析文本完整性测试
+        function testTextCompleteness() {
+            let results = [];
+            let html = '';
+            
+            if (typeof window.analysisTexts !== 'undefined') {
+                Object.keys(window.dimensionNames).forEach(dimensionKey => {
+                    const dimensionData = window.analysisTexts[dimensionKey];
+                    if (dimensionData) {
+                        const hasLow = !!dimensionData.low && dimensionData.low.length > 50;
+                        const hasMedium = !!dimensionData.medium && dimensionData.medium.length > 50;
+                        const hasHigh = !!dimensionData.high && dimensionData.high.length > 50;
+                        const isComplete = hasLow && hasMedium && hasHigh;
+                        
+                        results.push(isComplete);
+                        html += `<div class="test-result ${isComplete ? 'pass' : 'fail'}">${window.dimensionNames[dimensionKey]}: ${isComplete ? '✅' : '❌'}</div>`;
+                        
+                        if (!isComplete) {
+                            html += `<div style="margin-left: 20px; font-size: 12px; color: #666;">`;
+                            html += `低分段: ${hasLow ? '✅' : '❌'} `;
+                            html += `中分段: ${hasMedium ? '✅' : '❌'} `;
+                            html += `高分段: ${hasHigh ? '✅' : '❌'}</div>`;
+                        }
+                    } else {
+                        results.push(false);
+                        html += `<div class="test-result fail">${window.dimensionNames[dimensionKey]}: ❌ 无数据</div>`;
+                    }
+                });
+            } else {
+                results.push(false);
+                html += '<div class="test-result fail">analysisTexts 未定义 ❌</div>';
+            }
+            
+            const passed = results.every(r => r);
+            return { passed, html };
+        }
+        
+        // 3. 分数等级判断测试
+        function testScoreLevelJudgment() {
+            let results = [];
+            let html = '';
+            
+            // 测试 getLevel 函数
+            function getLevel(score) {
+                if (score <= 2.5) return 'low';
+                if (score <= 4.0) return 'medium';
+                return 'high';
+            }
+            
+            const testCases = [
+                { score: 1.0, expected: 'low' },
+                { score: 2.5, expected: 'low' },
+                { score: 2.6, expected: 'medium' },
+                { score: 3.0, expected: 'medium' },
+                { score: 4.0, expected: 'medium' },
+                { score: 4.1, expected: 'high' },
+                { score: 5.0, expected: 'high' }
+            ];
+            
+            testCases.forEach(testCase => {
+                const actual = getLevel(testCase.score);
+                const correct = actual === testCase.expected;
+                results.push(correct);
+                html += `<div class="test-result ${correct ? 'pass' : 'fail'}">${testCase.score}分: ${actual} ${correct ? '✅' : '❌'}</div>`;
+            });
+            
+            const passed = results.every(r => r);
+            return { passed, html };
+        }
+        
+        // 4. 维度名称映射测试
+        function testDimensionNames() {
+            let results = [];
+            let html = '';
+            
+            if (typeof window.dimensionNames !== 'undefined') {
+                const expectedKeys = [
+                    'selfInterest', 'greed', 'machiavellianism', 'moralDisengagement',
+                    'narcissism', 'psychologicalEntitlement', 'psychopathy', 'sadism',
+                    'selfCentered', 'malevolence'
+                ];
+                
+                expectedKeys.forEach(key => {
+                    const exists = key in window.dimensionNames;
+                    const hasChineseName = exists && window.dimensionNames[key].length > 0;
+                    const isValid = exists && hasChineseName;
+                    
+                    results.push(isValid);
+                    html += `<div class="test-result ${isValid ? 'pass' : 'fail'}">${key}: ${exists ? window.dimensionNames[key] : '缺失'} ${isValid ? '✅' : '❌'}</div>`;
+                });
+            } else {
+                results.push(false);
+                html += '<div class="test-result fail">dimensionNames 未定义 ❌</div>';
+            }
+            
+            const passed = results.every(r => r);
+            return { passed, html };
+        }
+        
+        // 页面加载完成后运行测试
+        document.addEventListener('DOMContentLoaded', runAllTests);
+    </script>
+</body>
+</html>

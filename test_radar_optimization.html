@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雷达图10层环优化测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .radar-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .test-button {
+            background: linear-gradient(45deg, #9D4EDD, #7B2CBF);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.4);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #9D4EDD;
+        }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        .info { border-left-color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>雷达图10层环优化测试</h1>
+        
+        <div class="test-section">
+            <h3>测试说明</h3>
+            <p>此测试验证雷达图是否成功从5层环优化到10层环，每层环对应10%的刻度。</p>
+            <div id="test-status" class="status info">
+                测试状态：准备就绪
+            </div>
+        </div>
+
+        <div class="radar-container">
+            <h3>优化后的雷达图（10层环）</h3>
+            <canvas id="optimized-radar" width="400" height="400"></canvas>
+        </div>
+
+        <div class="test-section">
+            <h3>测试控制</h3>
+            <button class="test-button" onclick="testDifferentScores()">测试不同分数</button>
+            <button class="test-button" onclick="testEdgeCases()">测试边界情况</button>
+            <button class="test-button" onclick="verifyGridLines()">验证网格线数量</button>
+            <button class="test-button" onclick="resetTest()">重置测试</button>
+        </div>
+
+        <div class="test-section">
+            <h3>测试结果</h3>
+            <div id="test-results"></div>
+        </div>
+    </div>
+
+    <script>
+        let optimizedChart;
+        let testResults = [];
+
+        // 初始化优化后的雷达图
+        function initOptimizedRadar() {
+            const ctx = document.getElementById('optimized-radar').getContext('2d');
+            
+            const options = {
+                scales: {
+                    r: {
+                        angleLines: {
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        },
+                        pointLabels: {
+                            color: '#F8F9FA',
+                            font: {
+                                size: 11
+                            }
+                        },
+                        ticks: {
+                            backdropColor: 'transparent',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            stepSize: 10,  // 关键：每10一个刻度
+                            min: 0,
+                            max: 100
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#F8F9FA',
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        tension: 0.2
+                    }
+                }
+            };
+
+            optimizedChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['利己主义', '贪婪', '马基雅维利主义', '道德推脱', '自恋', '心理权利', '精神变态', '施虐倾向', '自我为中心', '恶毒倾向', '黑暗三角总分(D)'],
+                    datasets: [{
+                        label: '测试分数',
+                        data: [50, 60, 45, 70, 55, 40, 65, 35, 80, 45, 60],
+                        backgroundColor: 'rgba(157, 78, 221, 0.3)',
+                        borderColor: 'rgba(157, 78, 221, 1)',
+                        pointBackgroundColor: 'rgba(157, 78, 221, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(157, 78, 221, 1)'
+                    }]
+                },
+                options: options
+            });
+
+            updateStatus('优化雷达图初始化完成', 'success');
+        }
+
+        // 测试不同分数
+        function testDifferentScores() {
+            const testData = [
+                [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 55],  // 递增
+                [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 55], // 递减
+                [50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50],  // 中等
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],              // 最低
+                [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100] // 最高
+            ];
+
+            let currentIndex = 0;
+            
+            function updateTest() {
+                if (currentIndex < testData.length) {
+                    optimizedChart.data.datasets[0].data = testData[currentIndex];
+                    optimizedChart.update();
+                    
+                    addResult(`测试数据组 ${currentIndex + 1}: [${testData[currentIndex].join(', ')}]`);
+                    currentIndex++;
+                    
+                    setTimeout(updateTest, 2000);
+                } else {
+                    addResult('不同分数测试完成', 'success');
+                }
+            }
+            
+            updateTest();
+        }
+
+        // 测试边界情况
+        function testEdgeCases() {
+            const edgeCases = [
+                { data: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], desc: '边界值测试' },
+                { data: [5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 50], desc: '中间值测试' },
+                { data: [3, 7, 13, 17, 23, 27, 33, 37, 43, 47, 25], desc: '不规则值测试' }
+            ];
+
+            edgeCases.forEach((testCase, index) => {
+                setTimeout(() => {
+                    optimizedChart.data.datasets[0].data = testCase.data;
+                    optimizedChart.update();
+                    addResult(`${testCase.desc}: 数据更新成功`);
+                }, index * 1500);
+            });
+
+            setTimeout(() => {
+                addResult('边界情况测试完成', 'success');
+            }, edgeCases.length * 1500);
+        }
+
+        // 验证网格线数量
+        function verifyGridLines() {
+            const scale = optimizedChart.scales.r;
+            const ticks = scale.ticks;
+            
+            addResult(`检测到刻度数量: ${ticks.length}`);
+            addResult(`刻度值: [${ticks.map(t => t.value).join(', ')}]`);
+            
+            // 验证是否为10层环（11个刻度点，包括0）
+            if (ticks.length === 11) {
+                addResult('✅ 验证成功：检测到11个刻度点（10层环）', 'success');
+            } else {
+                addResult(`❌ 验证失败：期望11个刻度点，实际${ticks.length}个`, 'error');
+            }
+        }
+
+        // 重置测试
+        function resetTest() {
+            optimizedChart.data.datasets[0].data = [50, 60, 45, 70, 55, 40, 65, 35, 80, 45, 60];
+            optimizedChart.update();
+            testResults = [];
+            document.getElementById('test-results').innerHTML = '';
+            updateStatus('测试已重置', 'info');
+        }
+
+        // 更新状态
+        function updateStatus(message, type = 'info') {
+            const statusElement = document.getElementById('test-status');
+            statusElement.className = `status ${type}`;
+            statusElement.textContent = `测试状态：${message}`;
+        }
+
+        // 添加测试结果
+        function addResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${type}`;
+            resultDiv.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            const resultsContainer = document.getElementById('test-results');
+            resultsContainer.appendChild(resultDiv);
+            resultsContainer.scrollTop = resultsContainer.scrollHeight;
+            
+            testResults.push({ timestamp, message, type });
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            initOptimizedRadar();
+            addResult('雷达图10层环优化测试系统已启动');
+            addResult('当前配置：stepSize=10, min=0, max=100');
+        });
+    </script>
+</body>
+</html>

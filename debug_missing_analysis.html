@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试 - 缺失分析文本问题</title>
+    <style>
+        body { 
+            font-family: 'Microsoft YaHei', Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px; 
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 { 
+            text-align: center; 
+            color: #4ecdc4; 
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+        .debug-section {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dimension-debug {
+            margin: 15px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 4px solid #4ecdc4;
+        }
+        .status-success { color: #28a745; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
+        .status-warning { color: #ffc107; font-weight: bold; }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+            border: 1px solid #4a5568;
+        }
+        .element-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .element-item {
+            background: rgba(78, 205, 196, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+        }
+        .element-id {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin: 5px 0;
+            word-break: break-all;
+        }
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 调试 - 详细维度分析缺失问题</h1>
+        
+        <div class="debug-section">
+            <h2>📋 问题分析</h2>
+            <p>通过对比函数调用和HTML元素ID，发现以下问题：</p>
+            
+            <div class="code-block">
+// 函数调用（1940-1955行）
+updateDimensionUI('selfInterest', '利己主义');                    // 无prefix
+updateDimensionUI('greed', '贪婪');                              // 无prefix  
+updateDimensionUI('machiavellianism', '马基雅维利主义', 'machiavellianism-detail'); // 有prefix
+updateDimensionUI('moralDisengagement', '道德推脱');              // 无prefix
+updateDimensionUI('narcissism', '自恋', 'narcissism-detail');     // 有prefix
+updateDimensionUI('psychologicalEntitlement', '心理权利');        // 无prefix
+updateDimensionUI('psychopathy', '精神变态', 'psychopathy-detail'); // 有prefix
+updateDimensionUI('sadism', '施虐倾向');                          // 无prefix
+updateDimensionUI('selfCentered', '自我为中心');                  // 无prefix
+updateDimensionUI('malevolence', '恶毒倾向');                     // 无prefix
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🔍 元素ID匹配检查</h2>
+            <div id="element-matching-results"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🧪 模拟测试</h2>
+            <button onclick="simulateUpdateDimensionUI()">模拟updateDimensionUI函数</button>
+            <button onclick="testElementFinding()">测试元素查找</button>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🔧 修复建议</h2>
+            <div id="fix-suggestions"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟分析文本数据
+        const analysisTexts = {
+            selfInterest: {
+                low: "你的利己主义倾向处于较低水平（0-33%）...",
+                medium: "你的利己主义倾向处于中等水平（34-66%）...",
+                high: "你的利己主义倾向处于较高水平（67-100%）..."
+            },
+            machiavellianism: {
+                low: "你的马基雅维利主义处于较低水平（0-33%）...",
+                medium: "你的马基雅维利主义处于中等水平（34-66%）...",
+                high: "你的马基雅维利主义处于较高水平（67-100%）..."
+            },
+            narcissism: {
+                low: "你的自恋处于较低水平（0-33%）...",
+                medium: "你的自恋处于中等水平（34-66%）...",
+                high: "你的自恋处于较高水平（67-100%）..."
+            },
+            psychopathy: {
+                low: "你的精神病态处于较低水平（0-33%）...",
+                medium: "你的精神病态处于中等水平（34-66%）...",
+                high: "你的精神病态处于较高水平（67-100%）..."
+            }
+        };
+
+        // 模拟用户分数
+        const userScores = {
+            selfInterest: 45,
+            machiavellianism: 67,
+            narcissism: 23,
+            psychopathy: 78
+        };
+
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        // 模拟实际的updateDimensionUI函数逻辑
+        function simulateUpdateDimensionUI(dimensionKey, dimensionName, elementIdPrefix = null) {
+            console.log(`=== updateDimensionUI 调试 ${dimensionKey} ===`);
+            
+            const prefix = elementIdPrefix || dimensionKey;
+            // 将驼峰式命名转换为连字符命名
+            const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            
+            console.log(`维度: ${dimensionKey}, 前缀: ${prefix}, kebabCase: ${kebabCasePrefix}`);
+            console.log(`分数: ${userScores[dimensionKey]}`);
+            
+            // 分析元素ID生成逻辑
+            const analysisElementId = `${kebabCasePrefix}-analysis`;
+            
+            console.log(`生成的分析元素ID: ${analysisElementId}`);
+            
+            return {
+                dimensionKey,
+                dimensionName,
+                score: userScores[dimensionKey],
+                analysisElementId,
+                prefix,
+                kebabCasePrefix
+            };
+        }
+
+        // 检查元素ID匹配情况
+        function checkElementMatching() {
+            const dimensions = [
+                { key: 'selfInterest', name: '利己主义', hasPrefix: false },
+                { key: 'greed', name: '贪婪', hasPrefix: false },
+                { key: 'machiavellianism', name: '马基雅维利主义', hasPrefix: true, prefix: 'machiavellianism-detail' },
+                { key: 'narcissism', name: '自恋', hasPrefix: true, prefix: 'narcissism-detail' },
+                { key: 'psychopathy', name: '精神变态', hasPrefix: true, prefix: 'psychopathy-detail' }
+            ];
+
+            const resultsHtml = dimensions.map(dim => {
+                const result = simulateUpdateDimensionUI(dim.key, dim.name, dim.hasPrefix ? dim.prefix : null);
+                const expectedAnalysisId = dim.hasPrefix ? 
+                    dim.prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase() + '-analysis' :
+                    dim.key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase() + '-analysis';
+
+                const actualAnalysisId = result.analysisElementId;
+                const isMatch = expectedAnalysisId === actualAnalysisId;
+
+                return `
+                    <div class="dimension-debug">
+                        <h3>${dim.name} (${dim.key})</h3>
+                        <div>函数调用: updateDimensionUI('${dim.key}', '${dim.name}'${dim.hasPrefix ? `, '${dim.prefix}'` : ''})</div>
+                        <div>生成的前缀: ${result.kebabCasePrefix}</div>
+                        <div>生成的分析ID: ${actualAnalysisId}</div>
+                        <div>期望的分析ID: ${expectedAnalysisId}</div>
+                        <div class="${isMatch ? 'status-success' : 'status-error'}">
+                            ${isMatch ? '✅ 匹配' : '❌ 不匹配'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('element-matching-results').innerHTML = resultsHtml;
+        }
+
+        // 测试元素查找（模拟HTML结构）
+        function testElementFinding() {
+            // 模拟HTML中的元素ID
+            const mockElements = [
+                'self-interest-analysis',
+                'greed-analysis',
+                'machiavellianism-analysis',  // HTML中的实际ID
+                'narcissism-analysis',         // HTML中的实际ID
+                'psychopathy-analysis',        // HTML中的实际ID
+                'moral-disengagement-analysis',
+                'psychological-entitlement-analysis',
+                'sadism-analysis',
+                'self-centered-analysis',
+                'malevolence-analysis'
+            ];
+
+            const testResults = [];
+
+            // 测试有问题的三个维度
+            const problematicDimensions = [
+                { key: 'machiavellianism', prefix: 'machiavellianism-detail' },
+                { key: 'narcissism', prefix: 'narcissism-detail' },
+                { key: 'psychopathy', prefix: 'psychopathy-detail' }
+            ];
+
+            problematicDimensions.forEach(dim => {
+                const prefix = dim.prefix;
+                const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+                const generatedAnalysisId = `${kebabCasePrefix}-analysis`;
+                
+                const exists = mockElements.includes(generatedAnalysisId);
+                const correctId = `${dim.key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()}-analysis`;
+                
+                testResults.push({
+                    dimension: dim.key,
+                    generatedId: generatedAnalysisId,
+                    correctId: correctId,
+                    exists: exists,
+                    issue: !exists ? `生成的ID "${generatedAnalysisId}" 不存在于HTML中，正确的ID应该是 "${correctId}"` : 'ID正确'
+                });
+            });
+
+            const resultsHtml = testResults.map(result => `
+                <div class="dimension-debug">
+                    <h3>${result.dimension}</h3>
+                    <div class="element-item">
+                        <div><strong>生成的分析ID:</strong></div>
+                        <div class="element-id">${result.generatedId}</div>
+                        <div><strong>正确的分析ID:</strong></div>
+                        <div class="element-id">${result.correctId}</div>
+                        <div class="${result.exists ? 'status-success' : 'status-error'}">
+                            ${result.exists ? '✅ 存在' : '❌ 不存在'}
+                        </div>
+                        <div class="status-warning">${result.issue}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('test-results').innerHTML = resultsHtml;
+        }
+
+        // 生成修复建议
+        function generateFixSuggestions() {
+            const suggestions = `
+                <div class="fix-item">
+                    <h3>🎯 问题根源</h3>
+                    <p>三个维度（machiavellianism、narcissism、psychopathy）在函数调用时传递了错误的elementIdPrefix参数：</p>
+                    <div class="code-block">
+// 问题代码
+updateDimensionUI('machiavellianism', '马基雅维利主义', 'machiavellianism-detail');
+updateDimensionUI('narcissism', '自恋', 'narcissism-detail');  
+updateDimensionUI('psychopathy', '精神变态', 'psychopathy-detail');
+                    </div>
+                    <p>这导致生成的分析元素ID为：</p>
+                    <div class="code-block">
+machiavellianism-detail-analysis  ❌（不存在）
+narcissism-detail-analysis       ❌（不存在）
+psychopathy-detail-analysis      ❌（不存在）
+                    </div>
+                    <p>而HTML中实际存在的元素ID是：</p>
+                    <div class="code-block">
+machiavellianism-analysis        ✅（存在）
+narcissism-analysis              ✅（存在）  
+psychopathy-analysis             ✅（存在）
+                    </div>
+                </div>
+
+                <div class="fix-item">
+                    <h3>🔧 修复方案</h3>
+                    <p><strong>方案1：</strong>移除错误的elementIdPrefix参数</p>
+                    <div class="code-block">
+// 修复代码
+updateDimensionUI('machiavellianism', '马基雅维利主义');  // 移除第三个参数
+updateDimensionUI('narcissism', '自恋');                   // 移除第三个参数
+updateDimensionUI('psychopathy', '精神变态');              // 移除第三个参数
+                    </div>
+                    
+                    <p><strong>方案2：</strong>或者修改HTML中的元素ID以匹配prefix</p>
+                    <div class="code-block">
+<!-- 修改HTML --&gt;
+&lt;div id="machiavellianism-detail-analysis"&gt;&lt;/div&gt;
+&lt;div id="narcissism-detail-analysis"&gt;&lt;/div&gt;
+&lt;div id="psychopathy-detail-analysis"&gt;&lt;/div&gt;
+                    </div>
+                    
+                    <p><strong>推荐：</strong>使用方案1，移除错误的prefix参数</p>
+                </div>
+            `;
+
+            document.getElementById('fix-suggestions').innerHTML = suggestions;
+        }
+
+        // 页面加载时自动运行检查
+        window.onload = function() {
+            checkElementMatching();
+            testElementFinding();
+            generateFixSuggestions();
+        };
+    </script>
+</body>
+</html>

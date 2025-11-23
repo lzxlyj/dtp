@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维度分数同步测试 - 黑暗三角人格测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+        .dimension-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .score-display {
+            font-weight: bold;
+            color: #9D4EDD;
+            min-width: 60px;
+            text-align: right;
+        }
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9D4EDD, #8A2BE2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .radar-container {
+            width: 500px;
+            height: 500px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .comparison-table th {
+            background: rgba(138, 43, 226, 0.2);
+            color: #9D4EDD;
+            font-weight: 600;
+        }
+        .sync-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .sync-ok {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .sync-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        h1, h2 {
+            color: #9D4EDD;
+            text-align: center;
+        }
+        .analysis-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #d1d5db;
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #9D4EDD;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 黑暗三角人格测试 - 维度分数同步验证</h1>
+        <p style="text-align: center; margin-bottom: 30px;">验证详细维度分析与雷达图分数是否完全同步</p>
+
+        <div class="test-section">
+            <h2>📊 测试控制面板</h2>
+            <div style="text-align: center;">
+                <button class="btn" onclick="generateRandomScores()">🎲 生成随机分数</button>
+                <button class="btn" onclick="generateExtremeScores()">⚡ 生成极端分数</button>
+                <button class="btn" onclick="generateZeroScores()">❌ 生成零分数</button>
+                <button class="btn" onclick="generateHundredScores()">💯 生成满分</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 30px;">
+            <div style="flex: 1;">
+                <div class="test-section">
+                    <h2>📋 详细维度分析 (Detailed Analysis)</h2>
+                    <div id="detailed-analysis"></div>
+                </div>
+            </div>
+            
+            <div style="flex: 1;">
+                <div class="test-section">
+                    <h2>🎯 雷达图数据 (Radar Chart Data)</h2>
+                    <div class="radar-container">
+                        <canvas id="radar-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 同步验证结果</h2>
+            <div id="sync-results"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟的分析文本
+        const analysisTexts = {
+            selfInterest: { low: "低利己主义分析", medium: "中等利己主义分析", high: "高利己主义分析" },
+            greed: { low: "低贪婪分析", medium: "中等贪婪分析", high: "高贪婪分析" },
+            machiavellianism: { low: "低马基雅维利主义分析", medium: "中等马基雅维利主义分析", high: "高马基雅维利主义分析" },
+            moralDisengagement: { low: "低道德推脱分析", medium: "中等道德推脱分析", high: "高道德推脱分析" },
+            narcissism: { low: "低自恋分析", medium: "中等自恋分析", high: "高自恋分析" },
+            psychologicalEntitlement: { low: "低心理权利分析", medium: "中等心理权利分析", high: "高心理权利分析" },
+            psychopathy: { low: "低精神变态分析", medium: "中等精神变态分析", high: "高精神变态分析" },
+            sadism: { low: "低施虐倾向分析", medium: "中等施虐倾向分析", high: "高施虐倾向分析" },
+            selfCentered: { low: "低自我为中心分析", medium: "中等自我为中心分析", high: "高自我为中心分析" },
+            malevolence: { low: "低恶毒倾向分析", medium: "中等恶毒倾向分析", high: "高恶毒倾向分析" }
+        };
+
+        // 用户分数对象
+        let userScores = {
+            selfInterest: 0,
+            greed: 0,
+            machiavellianism: 0,
+            moralDisengagement: 0,
+            narcissism: 0,
+            psychologicalEntitlement: 0,
+            psychopathy: 0,
+            sadism: 0,
+            selfCentered: 0,
+            malevolence: 0,
+            darkTriadTotal: 0
+        };
+
+        let radarChart = null;
+
+        // 维度中文名称映射
+        const dimensionNames = {
+            selfInterest: "利己主义",
+            greed: "贪婪",
+            machiavellianism: "马基雅维利主义",
+            moralDisengagement: "道德推脱",
+            narcissism: "自恋",
+            psychologicalEntitlement: "心理权利",
+            psychopathy: "精神变态",
+            sadism: "施虐倾向",
+            selfCentered: "自我为中心",
+            malevolence: "恶毒倾向"
+        };
+
+        // 获取等级
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        // 更新详细分析显示
+        function updateDetailedAnalysis() {
+            const container = document.getElementById('detailed-analysis');
+            container.innerHTML = '';
+
+            Object.keys(dimensionNames).forEach(dimensionKey => {
+                const score = userScores[dimensionKey];
+                const level = getLevel(score);
+                const analysis = analysisTexts[dimensionKey][level];
+                
+                const dimensionDiv = document.createElement('div');
+                dimensionDiv.className = 'dimension-item';
+                dimensionDiv.innerHTML = `
+                    <div>
+                        <strong>${dimensionNames[dimensionKey]}</strong>
+                        <div class="analysis-text">${analysis}</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${score}%"></div>
+                        </div>
+                        <div class="score-display">${score}%</div>
+                    </div>
+                `;
+                container.appendChild(dimensionDiv);
+            });
+        }
+
+        // 更新雷达图
+        function updateRadarChart() {
+            const data = [
+                userScores.selfInterest,
+                userScores.greed,
+                userScores.machiavellianism,
+                userScores.moralDisengagement,
+                userScores.narcissism,
+                userScores.psychologicalEntitlement,
+                userScores.psychopathy,
+                userScores.sadism,
+                userScores.selfCentered,
+                userScores.malevolence
+            ];
+
+            if (radarChart) {
+                radarChart.data.datasets[0].data = data;
+                radarChart.update();
+            }
+
+            // 验证同步
+            verifySynchronization(data);
+        }
+
+        // 验证同步
+        function verifySynchronization(radarData) {
+            const resultsContainer = document.getElementById('sync-results');
+            resultsContainer.innerHTML = '';
+
+            const table = document.createElement('table');
+            table.className = 'comparison-table';
+            
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+                <th>维度</th>
+                <th>详细分析分数</th>
+                <th>雷达图分数</th>
+                <th>差异</th>
+                <th>同步状态</th>
+            `;
+            table.appendChild(headerRow);
+
+            let totalDifference = 0;
+            let syncCount = 0;
+
+            const dimensions = Object.keys(dimensionNames);
+            dimensions.forEach((dimensionKey, index) => {
+                const detailedScore = userScores[dimensionKey];
+                const radarScore = radarData[index];
+                const difference = Math.abs(detailedScore - radarScore);
+                
+                totalDifference += difference;
+                if (difference === 0) syncCount++;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${dimensionNames[dimensionKey]}</strong></td>
+                    <td>${detailedScore}%</td>
+                    <td>${radarScore}%</td>
+                    <td>${difference === 0 ? '✅ 无差异' : '⚠️ ' + difference.toFixed(1) + '%'}</td>
+                    <td><span class="sync-status ${difference === 0 ? 'sync-ok' : 'sync-error'}">${difference === 0 ? '同步' : '不同步'}</span></td>
+                `;
+                table.appendChild(row);
+            });
+
+            resultsContainer.appendChild(table);
+
+            // 总体统计
+            const statsDiv = document.createElement('div');
+            statsDiv.style.marginTop = '20px';
+            statsDiv.style.padding = '15px';
+            statsDiv.style.background = 'rgba(255, 255, 255, 0.05)';
+            statsDiv.style.borderRadius = '8px';
+            statsDiv.style.borderLeft = `4px solid ${syncCount === dimensions.length ? '#22c55e' : '#ef4444'}`;
+            
+            statsDiv.innerHTML = `
+                <h3>📈 同步验证总结</h3>
+                <p><strong>总维度数:</strong> ${dimensions.length}</p>
+                <p><strong>同步维度数:</strong> ${syncCount} / ${dimensions.length}</p>
+                <p><strong>同步率:</strong> ${(syncCount / dimensions.length * 100).toFixed(1)}%</p>
+                <p><strong>平均差异:</strong> ${(totalDifference / dimensions.length).toFixed(2)}%</p>
+                <p><strong>同步状态:</strong> <span style="color: ${syncCount === dimensions.length ? '#22c55e' : '#ef4444'}; font-weight: bold;">
+                    ${syncCount === dimensions.length ? '✅ 所有维度完全同步！' : '⚠️ 存在不同步的维度'}
+                </span></p>
+            `;
+            resultsContainer.appendChild(statsDiv);
+        }
+
+        // 生成随机分数
+        function generateRandomScores() {
+            Object.keys(userScores).forEach(key => {
+                if (key !== 'darkTriadTotal') {
+                    userScores[key] = Math.floor(Math.random() * 101);
+                }
+            });
+            updateDisplay();
+        }
+
+        // 生成极端分数
+        function generateExtremeScores() {
+            Object.keys(userScores).forEach(key => {
+                if (key !== 'darkTriadTotal') {
+                    userScores[key] = Math.random() < 0.5 ? Math.floor(Math.random() * 20) : Math.floor(Math.random() * 20) + 80;
+                }
+            });
+            updateDisplay();
+        }
+
+        // 生成零分数
+        function generateZeroScores() {
+            Object.keys(userScores).forEach(key => {
+                if (key !== 'darkTriadTotal') {
+                    userScores[key] = 0;
+                }
+            });
+            updateDisplay();
+        }
+
+        // 生成满分
+        function generateHundredScores() {
+            Object.keys(userScores).forEach(key => {
+                if (key !== 'darkTriadTotal') {
+                    userScores[key] = 100;
+                }
+            });
+            updateDisplay();
+        }
+
+        // 更新所有显示
+        function updateDisplay() {
+            updateDetailedAnalysis();
+            updateRadarChart();
+        }
+
+        // 初始化雷达图
+        function initRadarChart() {
+            const ctx = document.getElementById('radar-chart').getContext('2d');
+            
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.values(dimensionNames),
+                    datasets: [{
+                        label: '测试分数',
+                        data: Array(10).fill(0),
+                        backgroundColor: 'rgba(157, 78, 221, 0.2)',
+                        borderColor: 'rgba(157, 78, 221, 1)',
+                        pointBackgroundColor: 'rgba(157, 78, 221, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(157, 78, 221, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            pointLabels: {
+                                color: '#9D4EDD',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f8f9fa',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initRadarChart();
+            generateRandomScores(); // 生成初始随机分数
+        });
+    </script>
+</body>
+</html>

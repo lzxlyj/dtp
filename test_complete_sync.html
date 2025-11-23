@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完整同步测试 - 10维度验证</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+        .test-btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .test-btn:hover { background: #0056b3; }
+        .dimension-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin: 20px 0; }
+        .dimension-card { padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9; }
+        .dimension-card h4 { margin: 0 0 10px 0; color: #333; }
+        .score-display { font-size: 18px; font-weight: bold; color: #007bff; margin: 5px 0; }
+        .progress-bar { width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; margin: 5px 0; }
+        .progress-fill { height: 100%; background: #007bff; border-radius: 4px; transition: width 0.3s ease; }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .test-log { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; }
+        .comparison-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .comparison-table th, .comparison-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .comparison-table th { background: #f2f2f2; }
+        .match { color: green; font-weight: bold; }
+        .mismatch { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 完整同步测试 - 10维度验证</h1>
+        <p>此测试验证所有10个维度的分数在概览区域和详细分析区域的同步显示</p>
+        
+        <div class="test-controls">
+            <button class="test-btn" onclick="testRandomScores()">🎲 随机分数测试</button>
+            <button class="test-btn" onclick="testHighScores()">📈 高分测试</button>
+            <button class="test-btn" onclick="testMediumScores()">📊 中分测试</button>
+            <button class="test-btn" onclick="testLowScores()">📉 低分测试</button>
+            <button class="test-btn" onclick="testEdgeCases()">⚡ 边界测试</button>
+            <button class="test-btn" onclick="clearResults()">🗑️ 清除结果</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 测试结果对比</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>维度</th>
+                        <th>期望分数</th>
+                        <th>概览区域</th>
+                        <th>详细区域</th>
+                        <th>同步状态</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-tbody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 维度显示状态</h3>
+            <div class="dimension-grid" id="dimension-grid">
+                <!-- 动态生成维度卡片 -->
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 测试日志</h3>
+            <div class="test-log" id="test-log"></div>
+        </div>
+
+        <div id="test-status"></div>
+    </div>
+
+    <script>
+        // 测试数据
+        const dimensions = [
+            { key: 'machiavellianism', name: '马基雅维利主义', isCore: true },
+            { key: 'narcissism', name: '自恋', isCore: true },
+            { key: 'psychopathy', name: '精神变态', isCore: true },
+            { key: 'selfInterest', name: '利己主义' },
+            { key: 'greed', name: '贪婪' },
+            { key: 'moralDisengagement', name: '道德推脱' },
+            { key: 'psychologicalEntitlement', name: '心理权利' },
+            { key: 'sadism', name: '施虐倾向' },
+            { key: 'selfCentered', name: '自我为中心' },
+            { key: 'malevolence', name: '恶毒倾向' }
+        ];
+
+        let testResults = [];
+
+        function log(message) {
+            const logElement = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${timestamp}] ${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearResults() {
+            testResults = [];
+            document.getElementById('comparison-tbody').innerHTML = '';
+            document.getElementById('dimension-grid').innerHTML = '';
+            document.getElementById('test-log').innerHTML = '';
+            document.getElementById('test-status').innerHTML = '';
+            log('结果已清除');
+        }
+
+        function generateTestScores(type = 'random') {
+            const scores = {};
+            dimensions.forEach(dim => {
+                switch(type) {
+                    case 'high':
+                        scores[dim.key] = Math.floor(Math.random() * 20) + 80; // 80-100%
+                        break;
+                    case 'medium':
+                        scores[dim.key] = Math.floor(Math.random() * 20) + 40; // 40-60%
+                        break;
+                    case 'low':
+                        scores[dim.key] = Math.floor(Math.random() * 20) + 0; // 0-20%
+                        break;
+                    case 'edge':
+                        scores[dim.key] = Math.random() < 0.5 ? 0 : 100; // 0% 或 100%
+                        break;
+                    default:
+                        scores[dim.key] = Math.floor(Math.random() * 100); // 0-100%
+                }
+            });
+            return scores;
+        }
+
+        function simulateUIUpdate(testScores) {
+            // 模拟概览区域更新
+            dimensions.forEach(dim => {
+                if (dim.isCore) {
+                    const overviewScore = document.getElementById(`${dim.key}-score`);
+                    const overviewLevel = document.getElementById(`${dim.key}-level`);
+                    if (overviewScore) overviewScore.textContent = testScores[dim.key];
+                    if (overviewLevel) {
+                        const level = getLevel(testScores[dim.key]);
+                        const levelText = level === 'low' ? '低' : level === 'medium' ? '中' : '高';
+                        overviewLevel.textContent = levelText;
+                    }
+                }
+            });
+
+            // 模拟详细分析区域更新
+            dimensions.forEach(dim => {
+                const detailScore = document.getElementById(`detail-${dim.key}-score`);
+                const detailBar = document.getElementById(`detail-${dim.key}-bar`);
+                const detailAnalysis = document.getElementById(`detail-${dim.key}-analysis`);
+                
+                if (detailScore) detailScore.textContent = `${testScores[dim.key]}%`;
+                if (detailBar) detailBar.style.width = `${testScores[dim.key]}%`;
+                if (detailAnalysis) {
+                    const level = getLevel(testScores[dim.key]);
+                    detailAnalysis.textContent = getAnalysisText(dim.key, level);
+                }
+            });
+        }
+
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        function getAnalysisText(dimensionKey, level) {
+            const analysisTexts = {
+                machiavellianism: {
+                    low: '你的马基雅维利主义倾向较低，表明你倾向于诚实、直接的交往方式。',
+                    medium: '你的马基雅维利主义倾向处于中等水平，在策略性和诚实之间保持平衡。',
+                    high: '你的马基雅维利主义倾向较高，可能倾向于使用策略和操控来达到目的。'
+                },
+                narcissism: {
+                    low: '你的自恋程度较低，表明你比较谦逊，不太需要他人的赞美。',
+                    medium: '你的自恋程度处于中等水平，有适度的自信和自尊。',
+                    high: '你的自恋程度较高，可能比较关注自我形象和他人对你的看法。'
+                },
+                psychopathy: {
+                    low: '你的精神变态特质较低，表明你有良好的同理心和情感连接能力。',
+                    medium: '你的精神变态特质处于中等水平，在理性和情感之间相对平衡。',
+                    high: '你的精神变态特质较高，可能缺乏同理心且比较冲动。'
+                }
+            };
+            
+            return analysisTexts[dimensionKey] ? analysisTexts[dimensionKey][level] : `${dimensionKey} - ${level}级别分析`;
+        }
+
+        function runSyncTest(testScores, testName) {
+            log(`开始${testName}...`);
+            testResults = [];
+            
+            // 模拟UI更新
+            simulateUIUpdate(testScores);
+            
+            // 检查同步状态
+            dimensions.forEach(dim => {
+                const expectedScore = testScores[dim.key];
+                let overviewScore = null;
+                let detailScore = null;
+                let status = '❌ 未找到元素';
+                
+                if (dim.isCore) {
+                    const overviewElement = document.getElementById(`${dim.key}-score`);
+                    overviewScore = overviewElement ? parseInt(overviewElement.textContent) : null;
+                }
+                
+                const detailElement = document.getElementById(`detail-${dim.key}-score`);
+                detailScore = detailElement ? parseInt(detailElement.textContent.replace('%', '')) : null;
+                
+                // 判断同步状态
+                if (dim.isCore) {
+                    if (overviewScore !== null && detailScore !== null) {
+                        if (overviewScore === expectedScore && detailScore === expectedScore) {
+                            status = '✅ 完全同步';
+                        } else if (overviewScore === expectedScore) {
+                            status = '⚠️ 概览同步，详细不同步';
+                        } else if (detailScore === expectedScore) {
+                            status = '⚠️ 详细同步，概览不同步';
+                        } else {
+                            status = '❌ 两者都不同步';
+                        }
+                    } else {
+                        status = '❌ 缺少元素';
+                    }
+                } else {
+                    if (detailScore !== null) {
+                        status = detailScore === expectedScore ? '✅ 同步' : '❌ 不同步';
+                    }
+                }
+                
+                testResults.push({
+                    dimension: dim.name,
+                    expected: expectedScore,
+                    overview: overviewScore,
+                    detail: detailScore,
+                    status: status,
+                    isCore: dim.isCore
+                });
+                
+                log(`${dim.name}: 期望=${expectedScore}%, 概览=${overviewScore}, 详细=${detailScore}, 状态=${status}`);
+            });
+            
+            // 更新对比表格
+            updateComparisonTable();
+            
+            // 更新维度卡片
+            updateDimensionCards(testScores);
+            
+            // 显示总体结果
+            const totalTests = testResults.length;
+            const passedTests = testResults.filter(r => r.status.includes('✅')).length;
+            const successRate = (passedTests / totalTests * 100).toFixed(1);
+            
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.innerHTML = `
+                <div class="status ${successRate == 100 ? 'success' : 'error'}">
+                    <h3>🎯 ${testName} 完成</h3>
+                    <p>总测试维度: ${totalTests} | 通过: ${passedTests} | 成功率: ${successRate}%</p>
+                    ${successRate == 100 ? '<p>✨ 所有维度同步显示正常！</p>' : '<p>⚠️ 部分维度存在同步问题，请查看详细日志</p>'}
+                </div>
+            `;
+            
+            log(`${testName} 完成: ${passedTests}/${totalTests} 通过 (${successRate}%)`);
+        }
+
+        function updateComparisonTable() {
+            const tbody = document.getElementById('comparison-tbody');
+            tbody.innerHTML = '';
+            
+            testResults.forEach(result => {
+                const row = document.createElement('tr');
+                const isMatch = result.status.includes('✅');
+                
+                row.innerHTML = `
+                    <td><strong>${result.dimension}</strong>${result.isCore ? ' 🔥' : ''}</td>
+                    <td>${result.expected}%</td>
+                    <td>${result.overview !== null ? result.overview : 'N/A'}</td>
+                    <td>${result.detail !== null ? result.detail : 'N/A'}%</td>
+                    <td class="${isMatch ? 'match' : 'mismatch'}">${result.status}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateDimensionCards(testScores) {
+            const grid = document.getElementById('dimension-grid');
+            grid.innerHTML = '';
+            
+            dimensions.forEach(dim => {
+                const score = testScores[dim.key];
+                const level = getLevel(score);
+                const result = testResults.find(r => r.dimension === dim.name);
+                
+                const card = document.createElement('div');
+                card.className = 'dimension-card';
+                card.innerHTML = `
+                    <h4>${dim.name} ${dim.isCore ? '🔥' : ''}</h4>
+                    <div class="score-display">${score}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${score}%"></div>
+                    </div>
+                    <div style="font-size: 12px; color: ${result.status.includes('✅') ? 'green' : 'red'};">
+                        ${result.status}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function testRandomScores() {
+            const scores = generateTestScores('random');
+            runSyncTest(scores, '🎲 随机分数测试');
+        }
+
+        function testHighScores() {
+            const scores = generateTestScores('high');
+            runSyncTest(scores, '📈 高分测试');
+        }
+
+        function testMediumScores() {
+            const scores = generateTestScores('medium');
+            runSyncTest(scores, '📊 中分测试');
+        }
+
+        function testLowScores() {
+            const scores = generateTestScores('low');
+            runSyncTest(scores, '📉 低分测试');
+        }
+
+        function testEdgeCases() {
+            const scores = generateTestScores('edge');
+            runSyncTest(scores, '⚡ 边界测试');
+        }
+
+        // 页面加载时运行一次随机测试
+        window.onload = function() {
+            log('🚀 完整同步测试系统已加载');
+            log('📊 准备测试所有10个维度的分数同步显示...');
+            setTimeout(() => {
+                testRandomScores();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

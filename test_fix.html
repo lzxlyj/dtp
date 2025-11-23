@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证测试</title>
+</head>
+<body>
+    <h1>修复验证测试页面</h1>
+    <div id="test-results"></div>
+    
+    <script src="optimized_scoring.js"></script>
+    <script src="auto_test_scores.js"></script>
+    <script>
+        const results = document.getElementById('test-results');
+        let hasError = false;
+        
+        // 检查关键变量是否存在
+        const checks = [
+            { name: 'dimensionNames', exists: typeof dimensionNames !== 'undefined' },
+            { name: 'analysisTexts', exists: typeof analysisTexts !== 'undefined' },
+            { name: 'ScoreAnalysisTester', exists: typeof ScoreAnalysisTester !== 'undefined' },
+            { name: 'testScores', exists: typeof testScores !== 'undefined' }
+        ];
+        
+        checks.forEach(check => {
+            const div = document.createElement('div');
+            div.style.color = check.exists ? 'green' : 'red';
+            div.textContent = `${check.name}: ${check.exists ? '✓ 存在' : '✗ 缺失'}`;
+            results.appendChild(div);
+            if (!check.exists) hasError = true;
+        });
+        
+        // 测试数据完整性
+        if (typeof analysisTexts !== 'undefined') {
+            const dimensions = Object.keys(analysisTexts);
+            const dimDiv = document.createElement('div');
+            dimDiv.style.color = dimensions.length === 10 ? 'green' : 'red';
+            dimDiv.textContent = `analysisTexts 维度数量: ${dimensions.length}/10`;
+            results.appendChild(dimDiv);
+            if (dimensions.length !== 10) hasError = true;
+        }
+        
+        // 测试ScoreAnalysisTester类
+        if (typeof ScoreAnalysisTester !== 'undefined') {
+            try {
+                const tester = new ScoreAnalysisTester();
+                const testDiv = document.createElement('div');
+                testDiv.style.color = 'green';
+                testDiv.textContent = 'ScoreAnalysisTester 实例化: ✓ 成功';
+                results.appendChild(testDiv);
+            } catch (e) {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.color = 'red';
+                errorDiv.textContent = `ScoreAnalysisTester 实例化: ✗ 失败 - ${e.message}`;
+                results.appendChild(errorDiv);
+                hasError = true;
+            }
+        }
+        
+        // 总体结果
+        const summaryDiv = document.createElement('div');
+        summaryDiv.style.fontWeight = 'bold';
+        summaryDiv.style.marginTop = '20px';
+        if (hasError) {
+            summaryDiv.style.color = 'red';
+            summaryDiv.textContent = '❌ 修复验证失败 - 发现错误';
+        } else {
+            summaryDiv.style.color = 'green';
+            summaryDiv.textContent = '✅ 修复验证成功 - 所有检查通过';
+        }
+        results.appendChild(summaryDiv);
+        
+        // 控制台输出详细信息
+        console.log('修复验证测试结果:', checks);
+        console.log('dimensionNames:', typeof dimensionNames !== 'undefined' ? dimensionNames : 'undefined');
+        console.log('analysisTexts:', typeof analysisTexts !== 'undefined' ? analysisTexts : 'undefined');
+    </script>
+</body>
+</html>

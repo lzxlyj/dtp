@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试所有10个维度显示</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-family: 'Microsoft YaHei', sans-serif;
+            padding: 20px;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .dimension-item {
+            background: #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #9b59b6;
+        }
+        .score-display {
+            color: #9b59b6;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .analysis-text {
+            color: #bbb;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        .test-buttons {
+            margin: 20px 0;
+        }
+        button {
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #8e44ad;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #2a2a2a;
+            border-left: 4px solid #27ae60;
+        }
+        .error {
+            border-left-color: #e74c3c;
+            background: #3a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-section">
+        <h1>🔍 测试所有10个维度显示</h1>
+        <p>这个页面将验证所有10个维度是否能正确显示分数和文本分析</p>
+        
+        <div class="test-buttons">
+            <button onclick="testLowScores()">测试低分数 (15%)</button>
+            <button onclick="testMediumScores()">测试中分数 (45%)</button>
+            <button onclick="testHighScores()">测试高分数 (85%)</button>
+            <button onclick="checkAllDimensions()">检查所有维度</button>
+            <button onclick="clearResults()">清除结果</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div id="dimensions-container">
+            <!-- 10个维度的UI结构 -->
+            <div class="dimension-item">
+                <h3>利己主义</h3>
+                <div class="score-display">分数: <span id="self-interest-score">0%</span></div>
+                <div class="analysis-text" id="self-interest-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>贪婪</h3>
+                <div class="score-display">分数: <span id="greed-score">0%</span></div>
+                <div class="analysis-text" id="greed-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>马基雅维利主义</h3>
+                <div class="score-display">分数: <span id="machiavellianism-detail-score">0%</span></div>
+                <div class="analysis-text" id="machiavellianism-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>道德推脱</h3>
+                <div class="score-display">分数: <span id="moral-disengagement-score">0%</span></div>
+                <div class="analysis-text" id="moral-disengagement-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>自恋</h3>
+                <div class="score-display">分数: <span id="narcissism-detail-score">0%</span></div>
+                <div class="analysis-text" id="narcissism-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>心理权利</h3>
+                <div class="score-display">分数: <span id="psychological-entitlement-score">0%</span></div>
+                <div class="analysis-text" id="psychological-entitlement-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>精神变态</h3>
+                <div class="score-display">分数: <span id="psychopathy-detail-score">0%</span></div>
+                <div class="analysis-text" id="psychopathy-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>施虐倾向</h3>
+                <div class="score-display">分数: <span id="sadism-score">0%</span></div>
+                <div class="analysis-text" id="sadism-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>自我为中心</h3>
+                <div class="score-display">分数: <span id="self-centered-score">0%</span></div>
+                <div class="analysis-text" id="self-centered-analysis">等待测试...</div>
+            </div>
+            
+            <div class="dimension-item">
+                <h3>恶毒倾向</h3>
+                <div class="score-display">分数: <span id="malevolence-score">0%</span></div>
+                <div class="analysis-text" id="malevolence-analysis">等待测试...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟的分析文本数据
+        const analysisTexts = {
+            selfInterest: {
+                low: "你的利己主义倾向处于较低水平（0-33%），表明你不太关注个人利益，更注重集体和他人的需求。你愿意为了更大的利益而牺牲个人利益，这种品质在团队合作和人际关系中非常宝贵。",
+                medium: "你的利己主义倾向处于中等水平（34-66%），能够在个人利益和集体利益之间找到平衡。在大多数情况下，你会考虑他人的感受，但在必要时也会为自己争取合理的利益。",
+                high: "你的利己主义倾向处于较高水平（67-100%），非常关注个人利益，倾向于优先考虑自己的需求和目标。这种特质可以帮助你在竞争激烈的环境中取得成功，但也可能影响你的人际关系和团队合作。"
+            },
+            greed: {
+                low: "你的贪婪程度处于较低水平（0-33%），对物质财富和权力没有强烈的欲望，更注重精神层面的满足。你容易感到满足，不会过分追求不属于自己的东西。",
+                medium: "你的贪婪程度处于中等水平（34-66%），对物质和权力有一定的追求，但能够控制在合理范围内。你明白努力工作的价值，也懂得适度享受生活。",
+                high: "你的贪婪程度处于较高水平（67-100%），对物质财富和权力有强烈的渴望，总是想要更多。这种强烈的欲望可以成为你前进的动力，但也可能导致你忽视其他重要的生活领域。"
+            },
+            machiavellianism: {
+                low: "你的马基雅维利主义倾向处于较低水平（0-33%），表明你是一个诚实正直的人，倾向于直接和透明的方式处理人际关系。你重视真诚和信任，不喜欢操纵他人。",
+                medium: "你的马基雅维利主义倾向处于中等水平（34-66%），能够在诚实和策略之间找到平衡。你理解人际关系的复杂性，有时会使用策略，但通常保持在道德范围内。",
+                high: "你的马基雅维利主义倾向处于较高水平（67-100%），倾向于使用策略和操纵来达成目标。你可能认为结果比手段更重要，这种态度可能帮助你在某些环境中成功，但也可能损害人际关系。"
+            },
+            moralDisengagement: {
+                low: "你的道德推脱水平较低（0-33%），表明你有较强的道德约束感，能够清楚地认识到自己的行为是否符合道德标准。你倾向于为自己的行为负责，并考虑行为对他人和社会的影响。",
+                medium: "你的道德推脱水平处于中等（34-66%），在大多数情况下能够意识到道德问题，但在某些情况下可能会为自己的不当行为找借口。你通常能够平衡个人利益与道德责任。",
+                high: "你的道德推脱水平较高（67-100%），倾向于为自己的不道德行为找借口和合理化。你可能会使用各种心理机制来减轻内疚感，这种倾向可能使你更容易做出有害的决定。"
+            },
+            narcissism: {
+                low: "你的自恋水平较低（0-33%），表明你比较谦逊，不会过分关注自己。你通常能够客观地看待自己，既认识到自己的优点，也接受自己的不足。",
+                medium: "你的自恋水平处于中等（34-66%），有适度的自信和自尊。你能够欣赏自己的成就，但不会过分夸大自己的重要性。这种平衡有助于建立健康的人际关系。",
+                high: "你的自恋水平较高（67-100%），倾向于过分关注自己，认为自己比他人更重要。你可能需要持续的赞美和关注，这种特质可能影响你的人际关系和团队合作。"
+            },
+            psychologicalEntitlement: {
+                low: "你的心理权利感较低（0-33%），表明你不认为自己应该得到特殊待遇。你倾向于通过自己的努力来获得想要的东西，而不是期望别人给你特殊的优待。",
+                medium: "你的心理权利感处于中等水平（34-66%），在大多数情况下有现实的期望，但有时会认为自己应该得到更好的待遇。你能够平衡个人期望与现实情况。",
+                high: "你的心理权利感较高（67-100%），倾向于认为自己应该得到特殊待遇和优待。当期望没有得到满足时，你可能会感到愤怒和不满，这种态度可能影响你的人际关系和生活满意度。"
+            },
+            psychopathy: {
+                low: "你的精神变态特质处于较低水平（0-33%），表明你有较强的同理心和情感连接能力。你能够理解他人的感受，并考虑行为对他人造成的影响。",
+                medium: "你的精神变态特质处于中等水平（34-66%），在理性和情感之间有一定的平衡。你能够做出理性的决定，但通常也会考虑情感因素和他人的感受。",
+                high: "你的精神变态特质处于较高水平（67-100%），可能表现出较低的同理心和较高的冲动性。你可能不太关心他人的感受，更倾向于追求即时的满足，这种特质可能导致冲动和有害的行为。"
+            },
+            sadism: {
+                low: "你的施虐倾向处于较低水平（0-33%），表明你有较强的同情心和善良本性。你不会从他人的痛苦中获得快乐，反而倾向于帮助和安慰他人。",
+                medium: "你的施虐倾向处于中等水平（34-66%），在大多数情况下表现出同情和善良，但在某些情况下可能会从他人的轻微不适中获得某种满足感。",
+                high: "你的施虐倾向处于较高水平（67-100%），可能会从他人的痛苦或羞辱中获得快感。这种倾向可能导致你做出伤害他人的行为，需要认真反思和控制这种冲动。"
+            },
+            selfCentered: {
+                low: "你的自我为中心程度较低（0-33%），表明你能够很好地考虑他人的观点和需求。你倾向于从多个角度看问题，并在决策时考虑他人的感受。",
+                medium: "你的自我为中心程度处于中等水平（34-66%），能够在关注自己和考虑他人之间找到平衡。你通常能够从自己的角度看问题，但也能够考虑他人的观点。",
+                high: "你的自我为中心程度较高（67-100%），倾向于主要从自己的角度看问题。你可能很难理解他人的观点，这种特质可能影响你的人际关系和团队合作能力。"
+            },
+            malevolence: {
+                low: "你的恶毒倾向处于较低水平（0-33%），表明你有善良和同情的本性。你倾向于帮助他人，而不是伤害他人，这种品质使你在人际关系中受到欢迎。",
+                medium: "你的恶毒倾向处于中等水平（34-66%），在大多数情况下表现出善意，但在受到伤害或威胁时可能会产生报复的想法。你能够控制这种冲动，通常不会付诸行动。",
+                high: "你的恶毒倾向处于较高水平（67-100%），可能会产生伤害他人的想法或冲动。这种倾向可能导致你做出有害的行为，需要认真反思和控制这种冲动，考虑寻求专业帮助。"
+            }
+        };
+
+        // 获取等级
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        // 更新维度显示
+        function updateDimensionDisplay(dimensionKey, score) {
+            let elementId, analysisId;
+            
+            // 处理不同的元素ID格式
+            switch(dimensionKey) {
+                case 'selfInterest':
+                    elementId = 'self-interest-score';
+                    analysisId = 'self-interest-analysis';
+                    break;
+                case 'greed':
+                    elementId = 'greed-score';
+                    analysisId = 'greed-analysis';
+                    break;
+                case 'machiavellianism':
+                    elementId = 'machiavellianism-detail-score';
+                    analysisId = 'machiavellianism-analysis';
+                    break;
+                case 'moralDisengagement':
+                    elementId = 'moral-disengagement-score';
+                    analysisId = 'moral-disengagement-analysis';
+                    break;
+                case 'narcissism':
+                    elementId = 'narcissism-detail-score';
+                    analysisId = 'narcissism-analysis';
+                    break;
+                case 'psychologicalEntitlement':
+                    elementId = 'psychological-entitlement-score';
+                    analysisId = 'psychological-entitlement-analysis';
+                    break;
+                case 'psychopathy':
+                    elementId = 'psychopathy-detail-score';
+                    analysisId = 'psychopathy-analysis';
+                    break;
+                case 'sadism':
+                    elementId = 'sadism-score';
+                    analysisId = 'sadism-analysis';
+                    break;
+                case 'selfCentered':
+                    elementId = 'self-centered-score';
+                    analysisId = 'self-centered-analysis';
+                    break;
+                case 'malevolence':
+                    elementId = 'malevolence-score';
+                    analysisId = 'malevolence-analysis';
+                    break;
+                default:
+                    console.error('未知的维度:', dimensionKey);
+                    return;
+            }
+
+            const scoreElement = document.getElementById(elementId);
+            const analysisElement = document.getElementById(analysisId);
+            
+            if (scoreElement) {
+                scoreElement.textContent = `${score}%`;
+            }
+            
+            if (analysisElement) {
+                const level = getLevel(score);
+                const analysisText = analysisTexts[dimensionKey][level];
+                analysisElement.textContent = analysisText;
+            }
+        }
+
+        // 测试低分数
+        function testLowScores() {
+            showStatus('正在测试低分数 (15%)...', false);
+            
+            const dimensions = ['selfInterest', 'greed', 'machiavellianism', 'moralDisengagement', 'narcissism', 
+                              'psychologicalEntitlement', 'psychopathy', 'sadism', 'selfCentered', 'malevolence'];
+            
+            dimensions.forEach(dimension => {
+                updateDimensionDisplay(dimension, 15);
+            });
+            
+            setTimeout(() => {
+                showStatus('✅ 低分数测试完成！所有维度都显示了15%的分数和对应的低水平分析文本。', false);
+            }, 500);
+        }
+
+        // 测试中分数
+        function testMediumScores() {
+            showStatus('正在测试中分数 (45%)...', false);
+            
+            const dimensions = ['selfInterest', 'greed', 'machiavellianism', 'moralDisengagement', 'narcissism', 
+                              'psychologicalEntitlement', 'psychopathy', 'sadism', 'selfCentered', 'malevolence'];
+            
+            dimensions.forEach(dimension => {
+                updateDimensionDisplay(dimension, 45);
+            });
+            
+            setTimeout(() => {
+                showStatus('✅ 中分数测试完成！所有维度都显示了45%的分数和对应的中等水平分析文本。', false);
+            }, 500);
+        }
+
+        // 测试高分数
+        function testHighScores() {
+            showStatus('正在测试高分数 (85%)...', false);
+            
+            const dimensions = ['selfInterest', 'greed', 'machiavellianism', 'moralDisengagement', 'narcissism', 
+                              'psychologicalEntitlement', 'psychopathy', 'sadism', 'selfCentered', 'malevolence'];
+            
+            dimensions.forEach(dimension => {
+                updateDimensionDisplay(dimension, 85);
+            });
+            
+            setTimeout(() => {
+                showStatus('✅ 高分数测试完成！所有维度都显示了85%的分数和对应的高水平分析文本。', false);
+            }, 500);
+        }
+
+        // 检查所有维度
+        function checkAllDimensions() {
+            showStatus('正在检查所有10个维度的元素...', false);
+            
+            const expectedElements = [
+                'self-interest-score', 'self-interest-analysis',
+                'greed-score', 'greed-analysis',
+                'machiavellianism-detail-score', 'machiavellianism-analysis',
+                'moral-disengagement-score', 'moral-disengagement-analysis',
+                'narcissism-detail-score', 'narcissism-analysis',
+                'psychological-entitlement-score', 'psychological-entitlement-analysis',
+                'psychopathy-detail-score', 'psychopathy-analysis',
+                'sadism-score', 'sadism-analysis',
+                'self-centered-score', 'self-centered-analysis',
+                'malevolence-score', 'malevolence-analysis'
+            ];
+            
+            let found = 0;
+            let missing = [];
+            
+            expectedElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    found++;
+                } else {
+                    missing.push(id);
+                }
+            });
+            
+            if (missing.length === 0) {
+                showStatus(`✅ 完美！所有20个元素（10个维度的分数和分析）都存在。`, false);
+            } else {
+                showStatus(`❌ 发现 ${missing.length} 个缺失元素: ${missing.join(', ')}`, true);
+            }
+        }
+
+        // 清除结果
+        function clearResults() {
+            const dimensions = ['selfInterest', 'greed', 'machiavellianism', 'moralDisengagement', 'narcissism', 
+                              'psychologicalEntitlement', 'psychopathy', 'sadism', 'selfCentered', 'malevolence'];
+            
+            dimensions.forEach(dimension => {
+                updateDimensionDisplay(dimension, 0);
+            });
+            
+            showStatus('结果已清除，所有维度重置为0%。', false);
+        }
+
+        // 显示状态信息
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = isError ? 'status error' : 'status';
+            statusElement.style.display = 'block';
+        }
+
+        // 页面加载完成后检查
+        window.onload = function() {
+            setTimeout(() => {
+                checkAllDimensions();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

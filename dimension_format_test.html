@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维度格式统一测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #e0e0e0; }
+        .dimension { margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 5px; }
+        .dimension h3 { color: #a78bfa; margin-bottom: 10px; }
+        .score-bar { display: flex; align-items: center; margin: 10px 0; }
+        .bar { width: 200px; height: 10px; background: #333; border-radius: 5px; margin-left: 10px; }
+        .fill { height: 100%; background: #a78bfa; border-radius: 5px; }
+        .analysis { font-size: 14px; line-height: 1.6; margin-top: 10px; }
+        .status { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
+        .success { background: #28a745; color: white; }
+        .error { background: #dc3545; color: white; }
+        .warning { background: #ffc107; color: black; }
+    </style>
+</head>
+<body>
+    <h1>维度格式统一测试</h1>
+    <p>此页面用于验证所有10个维度的分析格式是否统一</p>
+    
+    <div id="test-results"></div>
+
+    <script>
+        // 测试数据
+        const testScores = {
+            'self-interest': 75,
+            'greed': 60,
+            'machiavellianism-detail': 80,
+            'moral-disengagement': 45,
+            'narcissism-detail': 70,
+            'psychological-entitlement': 55,
+            'psychopathy-detail': 65,
+            'sadism': 40,
+            'self-centered': 50,
+            'malevolence': 35
+        };
+
+        // 分析文本模板
+        const analysisTexts = {
+            'self-interest': '你的利己主义处于高水平（75%），这表明你在决策时倾向于优先考虑个人利益。这种特质在某些情况下有助于维护自身权益，但过度发展可能影响人际关系。',
+            'greed': '你的贪婪处于中等水平（60%），这表明你对物质和资源有一定程度的渴望，但通常能够控制在合理范围内。',
+            'machiavellianism-detail': '你的马基雅维利主义处于高水平（80%），这表明你在人际交往中倾向于使用策略和手段来达到目的。',
+            'moral-disengagement': '你的道德推脱处于中等水平（45%），这表明你在某些情况下可能会为自己的不当行为寻找理由。',
+            'narcissism-detail': '你的自恋处于高水平（70%），这表明你有较强的自我关注倾向，重视自我价值感。',
+            'psychological-entitlement': '你的心理权利处于中等水平（55%），这表明你有一定程度的权利意识，但通常能够平衡个人与他人的需求。',
+            'psychopathy-detail': '你的精神变态处于中等水平（65%），这表明你在某些情况下可能表现出冷漠和缺乏同情心。',
+            'sadism': '你的施虐倾向处于中等水平（40%），这表明你在某些情况下可能从他人的痛苦中获得快感。',
+            'self-centered': '你的自我为中心处于中等水平（50%），这表明你有一定程度的自我关注，但能够考虑他人的感受。',
+            'malevolence': '你的恶毒倾向处于低水平（35%），这表明你通常不会主动伤害他人，具有较好的善意。'
+        };
+
+        // 维度名称映射
+        const dimensionNames = {
+            'self-interest': '利己主义',
+            'greed': '贪婪',
+            'machiavellianism-detail': '马基雅维利主义',
+            'moral-disengagement': '道德推脱',
+            'narcissism-detail': '自恋',
+            'psychological-entitlement': '心理权利',
+            'psychopathy-detail': '精神变态',
+            'sadism': '施虐倾向',
+            'self-centered': '自我为中心',
+            'malevolence': '恶毒倾向'
+        };
+
+        function testFormat() {
+            const results = document.getElementById('test-results');
+            let allPassed = true;
+
+            Object.keys(testScores).forEach(dimensionId => {
+                const score = testScores[dimensionId];
+                const analysis = analysisTexts[dimensionId];
+                const name = dimensionNames[dimensionId];
+                
+                // 检查格式
+                const formatCheck = checkAnalysisFormat(analysis, dimensionId);
+                
+                const dimensionDiv = document.createElement('div');
+                dimensionDiv.className = 'dimension';
+                dimensionDiv.innerHTML = `
+                    <h3>${name} <span class="status ${formatCheck.passed ? 'success' : 'error'}">${formatCheck.passed ? '通过' : '失败'}</span></h3>
+                    <div class="score-bar">
+                        <span>${score}%</span>
+                        <div class="bar">
+                            <div class="fill" style="width: ${score}%"></div>
+                        </div>
+                    </div>
+                    <div class="analysis">
+                        <strong>分析文本：</strong><br>
+                        ${analysis}
+                    </div>
+                    ${formatCheck.message ? `<div class="status error">${formatCheck.message}</div>` : ''}
+                `;
+                
+                results.appendChild(dimensionDiv);
+                
+                if (!formatCheck.passed) {
+                    allPassed = false;
+                }
+            });
+
+            // 总体结果
+            const summary = document.createElement('div');
+            summary.style.marginTop = '30px';
+            summary.style.padding = '20px';
+            summary.style.borderRadius = '10px';
+            summary.style.background = allPassed ? '#28a745' : '#dc3545';
+            summary.style.color = 'white';
+            summary.style.fontSize = '18px';
+            summary.style.textAlign = 'center';
+            summary.innerHTML = `
+                <h2>测试结果：${allPassed ? '全部通过！' : '存在格式问题'}</h2>
+                <p>${allPassed ? '所有10个维度的分析格式已完全统一' : '部分维度的格式需要调整'}</p>
+            `;
+            
+            results.appendChild(summary);
+        }
+
+        function checkAnalysisFormat(text, dimensionId) {
+            // 检查是否包含"你的XXX处于XXX水平（百分比）"格式
+            const expectedPattern = /你的\S+处于\S+水平（\d+%）/;
+            
+            if (!expectedPattern.test(text)) {
+                return {
+                    passed: false,
+                    message: '格式错误：分析文本未包含"你的XXX处于XXX水平（百分比）"格式'
+                };
+            }
+
+            // 检查是否包含具体描述内容
+            if (text.length < 30) {
+                return {
+                    passed: false,
+                    message: '内容错误：分析文本过于简短，缺乏具体描述'
+                };
+            }
+
+            return {
+                passed: true,
+                message: ''
+            };
+        }
+
+        // 运行测试
+        testFormat();
+    </script>
+</body>
+</html>

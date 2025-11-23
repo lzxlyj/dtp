@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 - 黑暗三角人格3.0升级版</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6C1CD3', // 紫色主题
+                        secondary: '#1A1A1A', // 深黑色
+                        accent: '#9D4EDD', // 亮紫色
+                        dark: '#0A0A0A', // 黑色
+                        light: '#F8F9FA', // 白色
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            }
+            .text-glow {
+                text-shadow: 0 0 10px rgba(157, 78, 221, 0.7);
+            }
+        }
+    </style>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #0A0A0A;
+            color: #F8F9FA;
+            padding: 20px;
+        }
+        
+        .radar-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center text-glow">
+            <span class="text-primary">雷达图</span>合并测试
+        </h1>
+        
+        <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-accent">分数分布与人群排名对比</h2>
+            <div class="radar-container">
+                <canvas id="combined-radar-chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="text-center mt-8">
+            <button id="generate-data-btn" class="px-6 py-2 bg-gradient-purple text-white rounded-lg hover:opacity-90 transition">
+                生成随机数据
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let combinedRadarChart = null;
+        
+        // 初始化雷达图
+        function initRadarChart() {
+            const ctx = document.getElementById('combined-radar-chart').getContext('2d');
+            
+            const options = {
+                scales: {
+                    r: {
+                        angleLines: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        pointLabels: {
+                            color: '#F8F9FA',
+                            font: {
+                                size: 12
+                            }
+                        },
+                        ticks: {
+                            backdropColor: 'transparent',
+                            color: 'rgba(255, 255, 255, 0.5)'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#F8F9FA',
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        tension: 0.2
+                    }
+                }
+            };
+            
+            combinedRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['利己主义', '贪婪', '马基雅维利主义', '道德推脱', '自恋', '心理权利', '精神变态', '施虐倾向', '自我为中心', '恶毒倾向'],
+                    datasets: [
+                        {
+                            label: '你的分数',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(157, 78, 221, 0.2)',
+                            borderColor: 'rgba(157, 78, 221, 1)',
+                            pointBackgroundColor: 'rgba(157, 78, 221, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(157, 78, 221, 1)'
+                        },
+                        {
+                            label: '人群排名',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+                        }
+                    ]
+                },
+                options: options
+            });
+        }
+        
+        // 生成随机数据
+        function generateRandomData() {
+            // 生成用户分数（20-80之间的随机数）
+            const userData = Array.from({length: 10}, () => Math.floor(Math.random() * 60) + 20);
+            
+            // 生成排名分数（确保不超过用户分数）
+            const rankData = userData.map(userScore => {
+                // 排名分数在用户分数的0.5-1倍之间
+                return Math.floor(userScore * (0.5 + Math.random() * 0.5));
+            });
+            
+            // 更新雷达图
+            combinedRadarChart.data.datasets[0].data = userData;
+            combinedRadarChart.data.datasets[1].data = rankData;
+            combinedRadarChart.update();
+            
+            // 显示数据
+            console.log('用户分数:', userData);
+            console.log('排名分数:', rankData);
+        }
+        
+        // 绑定事件
+        document.getElementById('generate-data-btn').addEventListener('click', generateRandomData);
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initRadarChart();
+            generateRandomData();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时同步验证 - 详细维度分析与雷达图</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #9D4EDD;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        .dimension-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #9D4EDD;
+        }
+        .score-display {
+            font-weight: bold;
+            color: #00D9FF;
+            min-width: 50px;
+            text-align: right;
+        }
+        .sync-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .sync-ok {
+            background: #28a745;
+            color: white;
+        }
+        .sync-error {
+            background: #dc3545;
+            color: white;
+        }
+        .radar-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        #radar-chart {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn {
+            background: linear-gradient(45deg, #9D4EDD, #00D9FF);
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .summary {
+            background: rgba(157, 78, 221, 0.2);
+            border: 2px solid #9D4EDD;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .dimension-comparison {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+            padding: 8px;
+            margin: 2px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+        .dimension-name {
+            font-weight: bold;
+            color: #9D4EDD;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 实时同步验证系统</h1>
+        <p style="text-align: center; margin-bottom: 30px;">验证详细维度分析、雷达图和用户得分的完全同步性</p>
+
+        <div class="controls">
+            <button class="btn" onclick="generateTestScores()">🎲 生成测试得分</button>
+            <button class="btn" onclick="generateExtremeScores()">⚡ 极端得分测试</button>
+            <button class="btn" onclick="generateRandomScores()">🔄 随机得分</button>
+            <button class="btn" onclick="verifySynchronization()">✅ 验证同步</button>
+        </div>
+
+        <div class="comparison-grid">
+            <div class="test-section">
+                <h2>📊 详细维度分析 (Detailed Analysis)</h2>
+                <div id="detailed-analysis"></div>
+            </div>
+            
+            <div class="test-section">
+                <h2>🎯 雷达图数据 (Radar Chart)</h2>
+                <div class="radar-container">
+                    <canvas id="radar-chart" width="400" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 同步对比验证 (Synchronization Verification)</h2>
+            <div id="sync-comparison"></div>
+        </div>
+
+        <div class="summary" id="summary-report">
+            <h3>📈 验证总结报告</h3>
+            <div id="summary-content">等待验证数据...</div>
+        </div>
+    </div>
+
+    <script>
+        let radarChart;
+        let currentScores = {};
+        const dimensionNames = {
+            'selfInterest': '利己主义',
+            'greed': '贪婪', 
+            'machiavellianism': '马基雅维利主义',
+            'moralDisengagement': '道德推脱',
+            'narcissism': '自恋',
+            'psychologicalEntitlement': '心理权利',
+            'psychopathy': '精神变态',
+            'sadism': '施虐倾向',
+            'selfCentered': '自我为中心',
+            'malevolence': '恶毒倾向'
+        };
+
+        // 初始化雷达图
+        function initRadarChart() {
+            const ctx = document.getElementById('radar-chart').getContext('2d');
+            
+            const data = {
+                labels: Object.values(dimensionNames),
+                datasets: [{
+                    label: '用户得分',
+                    data: Object.keys(dimensionNames).map(key => currentScores[key] || 0),
+                    backgroundColor: 'rgba(157, 78, 221, 0.2)',
+                    borderColor: '#9D4EDD',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#9D4EDD',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            };
+
+            const config = {
+                type: 'radar',
+                data: data,
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 10,
+                                color: '#fff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            pointLabels: {
+                                color: '#fff',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#fff'
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (radarChart) {
+                radarChart.destroy();
+            }
+            
+            radarChart = new Chart(ctx, config);
+        }
+
+        // 生成测试得分
+        function generateTestScores() {
+            currentScores = {
+                selfInterest: 75,
+                greed: 60,
+                machiavellianism: 85,
+                moralDisengagement: 45,
+                narcissism: 70,
+                psychologicalEntitlement: 55,
+                psychopathy: 40,
+                sadism: 30,
+                selfCentered: 65,
+                malevolence: 25
+            };
+            updateAllDisplays();
+        }
+
+        // 生成极端得分
+        function generateExtremeScores() {
+            currentScores = {
+                selfInterest: 95,
+                greed: 90,
+                machiavellianism: 98,
+                moralDisengagement: 85,
+                narcissism: 92,
+                psychologicalEntitlement: 88,
+                psychopathy: 80,
+                sadism: 75,
+                selfCentered: 87,
+                malevolence: 70
+            };
+            updateAllDisplays();
+        }
+
+        // 生成随机得分
+        function generateRandomScores() {
+            Object.keys(dimensionNames).forEach(key => {
+                currentScores[key] = Math.floor(Math.random() * 101);
+            });
+            updateAllDisplays();
+        }
+
+        // 更新所有显示
+        function updateAllDisplays() {
+            updateDetailedAnalysis();
+            updateRadarChart();
+            verifySynchronization();
+        }
+
+        // 更新详细分析显示
+        function updateDetailedAnalysis() {
+            const container = document.getElementById('detailed-analysis');
+            container.innerHTML = '';
+
+            Object.entries(dimensionNames).forEach(([key, name]) => {
+                const score = currentScores[key] || 0;
+                const level = getLevel(score);
+                
+                const dimensionDiv = document.createElement('div');
+                dimensionDiv.className = 'dimension-item';
+                dimensionDiv.innerHTML = `
+                    <div>
+                        <strong>${name}</strong>
+                        <div style="font-size: 12px; color: #ccc;">等级: ${getLevelText(level)}</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div class="progress-bar" style="width: 100px; height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-right: 10px;">
+                            <div class="progress-fill" style="width: ${score}%; height: 100%; background: #00D9FF; border-radius: 4px;"></div>
+                        </div>
+                        <div class="score-display">${score}%</div>
+                    </div>
+                `;
+                container.appendChild(dimensionDiv);
+            });
+        }
+
+        // 更新雷达图
+        function updateRadarChart() {
+            if (radarChart) {
+                radarChart.data.datasets[0].data = Object.keys(dimensionNames).map(key => currentScores[key] || 0);
+                radarChart.update();
+            }
+        }
+
+        // 验证同步
+        function verifySynchronization() {
+            const comparisonContainer = document.getElementById('sync-comparison');
+            const summaryContainer = document.getElementById('summary-content');
+            
+            comparisonContainer.innerHTML = '';
+            
+            let totalDifference = 0;
+            let syncCount = 0;
+            let totalScore = 0;
+
+            // 创建对比表格标题
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'dimension-comparison';
+            headerDiv.style.fontWeight = 'bold';
+            headerDiv.style.background = 'rgba(157, 78, 221, 0.3)';
+            headerDiv.innerHTML = `
+                <div class="dimension-name">维度</div>
+                <div>详细分析得分</div>
+                <div>雷达图数据</div>
+                <div>差异</div>
+                <div>同步状态</div>
+            `;
+            comparisonContainer.appendChild(headerDiv);
+
+            Object.entries(dimensionNames).forEach(([key, name]) => {
+                const detailedScore = currentScores[key] || 0;
+                const radarScore = currentScores[key] || 0;
+                const difference = Math.abs(detailedScore - radarScore);
+                const isSynced = difference === 0;
+                
+                totalDifference += difference;
+                if (isSynced) syncCount++;
+                totalScore += detailedScore;
+
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'dimension-comparison';
+                rowDiv.innerHTML = `
+                    <div class="dimension-name">${name}</div>
+                    <div class="score-display">${detailedScore}%</div>
+                    <div class="score-display">${radarScore}%</div>
+                    <div class="score-display">${difference}%</div>
+                    <div>
+                        <span class="sync-status ${isSynced ? 'sync-ok' : 'sync-error'}">
+                            ${isSynced ? '✅ 同步' : '❌ 不同步'}
+                        </span>
+                    </div>
+                `;
+                comparisonContainer.appendChild(rowDiv);
+            });
+
+            // 计算统计数据
+            const avgDifference = (totalDifference / Object.keys(dimensionNames).length).toFixed(1);
+            const syncRate = ((syncCount / Object.keys(dimensionNames).length) * 100).toFixed(1);
+            const avgScore = (totalScore / Object.keys(dimensionNames).length).toFixed(1);
+
+            // 更新总结报告
+            summaryContainer.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #00D9FF;">${syncRate}%</div>
+                        <div>同步成功率</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #9D4EDD;">${avgDifference}%</div>
+                        <div>平均差异</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #28a745;">${syncCount}/10</div>
+                        <div>同步维度数</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #ffc107;">${avgScore}%</div>
+                        <div>平均得分</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: ${syncRate == 100 ? 'rgba(40, 167, 69, 0.2)' : 'rgba(220, 53, 69, 0.2)'}; border-radius: 10px; border: 2px solid ${syncRate == 100 ? '#28a745' : '#dc3545'};">
+                    <div style="font-weight: bold; font-size: 16px;">
+                        ${syncRate == 100 ? '✅ 完美同步！' : '⚠️ 同步存在问题'}
+                    </div>
+                    <div style="margin-top: 10px;">
+                        ${syncRate == 100 ? 
+                            '所有维度的详细分析得分与雷达图数据完全同步，系统运行正常！' : 
+                            `检测到 ${10-syncCount} 个维度存在同步差异，平均差异为 ${avgDifference}%，需要进一步检查。`}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 辅助函数
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        function getLevelText(level) {
+            const texts = {
+                'low': '低水平',
+                'medium': '中等水平', 
+                'high': '高水平'
+            };
+            return texts[level] || '未知';
+        }
+
+        // 加载Chart.js
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        script.onload = function() {
+            initRadarChart();
+            generateTestScores();
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

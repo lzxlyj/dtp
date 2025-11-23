@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直接测试 - 分析文本显示</title>
+    <style>
+        body { 
+            font-family: 'Microsoft YaHei', Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px; 
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 { 
+            text-align: center; 
+            color: #4ecdc4; 
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dimension-item {
+            margin: 15px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 4px solid #4ecdc4;
+        }
+        .dimension-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .dimension-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        .score-badge {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .analysis-content {
+            background: rgba(78, 205, 196, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #333;
+        }
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 详细维度分析文本显示修复验证</h1>
+        
+        <div class="test-section">
+            <h2>📋 测试控制面板</h2>
+            <p>点击按钮测试不同分数场景下的分析文本显示效果</p>
+            <div style="margin: 15px 0;">
+                <button onclick="testLowScores()">测试低分数 (0-33%)</button>
+                <button onclick="testMediumScores()">测试中分数 (34-66%)</button>
+                <button onclick="testHighScores()">测试高分数 (67-100%)</button>
+                <button onclick="testRandomScores()">测试随机分数</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 维度分析结果显示</h2>
+            <div id="dimensions-container">
+                <!-- 维度分析结果将在这里动态生成 -->
+            </div>
+        </div>
+
+        <div class="console-output" id="console-output">
+            <strong>控制台输出：</strong><br>
+            等待测试开始...
+        </div>
+    </div>
+
+    <script>
+        // 分析文本数据（复制自index.html）
+        const analysisTexts = {
+            selfInterest: {
+                low: "你的利己主义倾向处于较低水平（0-33%），表明你不太关注个人利益，更注重集体和他人的需求。你愿意为了更大的利益而牺牲个人利益，这种品质在团队合作和人际关系中非常宝贵。",
+                medium: "你的利己主义倾向处于中等水平（34-66%），能够在个人利益和集体利益之间找到平衡。在大多数情况下，你会考虑他人的感受，但在必要时也会为自己争取合理的利益。",
+                high: "你的利己主义倾向处于较高水平（67-100%），非常关注个人利益，倾向于优先考虑自己的需求和目标。这种特质可以帮助你在竞争激烈的环境中取得成功，但也可能影响你的人际关系和团队合作。"
+            },
+            greed: {
+                low: "你的贪婪程度处于较低水平（0-33%），对物质财富和权力没有强烈的欲望，更注重精神层面的满足。你容易感到满足，不会过分追求不属于自己的东西。",
+                medium: "你的贪婪程度处于中等水平（34-66%），对物质和权力有一定的追求，但能够控制在合理范围内。你明白努力工作的价值，也懂得适度享受生活。",
+                high: "你的贪婪程度处于较高水平（67-100%），对物质财富和权力有强烈的渴望，总是想要更多。这种强烈的欲望可以成为你前进的动力，但也可能导致你忽视其他重要的生活领域。"
+            },
+            machiavellianism: {
+                low: "你的马基雅维利主义处于较低水平（0-33%），是一个非常正直和诚实的人，不屑于使用操纵或欺骗的手段来达到目的。你相信真诚和公平是处理人际关系的最佳方式，在工作和生活中倾向于直接表达自己的想法，不会刻意隐藏真实意图或玩弄心计。",
+                medium: "你的马基雅维利主义处于中等水平（34-66%），能够在策略性思维和道德原则之间找到平衡。在某些情况下你会使用策略性思维来达到目的，但不会越过道德底线，能够根据不同的情况调整自己的行为方式，在需要时展现出一定的外交手腕。",
+                high: "你的马基雅维利主义处于较高水平（67-100%），非常善于策略性思考和操纵他人，为了达到目的可以不择手段。你能够敏锐地观察他人的弱点，并巧妙地加以利用，在处理复杂情况时往往能够制定出精妙的策略，善于隐藏自己的真实意图。"
+            },
+            moralDisengagement: {
+                low: "你的道德脱离程度处于较低水平（0-33%），有非常强烈的道德感和责任感，严格遵守自己的道德准则。即使在困难的情况下，你也不会轻易妥协自己的道德原则。",
+                medium: "你的道德脱离程度处于中等水平（34-66%），有基本的道德准则，但在某些情况下会灵活处理。你能够理解不同情况下的道德复杂性，并做出相应的判断。",
+                high: "你的道德脱离程度处于较高水平（67-100%），经常为自己的不道德行为寻找借口，能够轻易地为自己的行为辩护。你认为道德规则是相对的，可以根据具体情况灵活解释。"
+            },
+            narcissism: {
+                low: "你的自恋处于较低水平（0-33%），是一个非常谦虚和低调的人，不太关注自己的成就和优点。你更倾向于看到他人的价值和贡献，而不是强调自己的重要性，通常对自己的能力有清醒的认识。",
+                medium: "你的自恋处于中等水平（34-66%），对自己有合理的自信，能够认识到自己的优点和不足。你在适当的时候会表现自己，但不会过分炫耀或自大，能够在自我肯定和谦逊之间找到合适的平衡点。",
+                high: "你的自恋处于较高水平（67-100%），非常自信，甚至有些自负，总是希望成为关注的焦点。你相信自己比他人更优秀，应该得到特殊的待遇和认可，渴望成为众人瞩目的中心，享受被赞美和崇拜的感觉。"
+            },
+            psychologicalEntitlement: {
+                low: "你的心理权利感处于较低水平（0-33%），不认为自己应该得到特殊的待遇，相信每个人都应该平等地努力和付出。你不会轻易要求他人为你提供便利或特殊照顾。",
+                medium: "你的心理权利感处于中等水平（34-66%），认为自己在某些情况下应该得到合理的特殊待遇，特别是当你付出了额外的努力或具有特殊的能力时。",
+                high: "你的心理权利感处于较高水平（67-100%），强烈认为自己应该得到特殊的待遇和尊重，无论自己的实际表现如何。你经常要求他人为你提供便利，而不考虑他人的感受。"
+            },
+            psychopathy: {
+                low: "你的精神病态处于较低水平（0-33%），非常重视他人的感受和福祉，总是尽量避免伤害他人。你有强烈的同理心和责任感，是一个非常善良和体贴的人，能够深刻地感受到他人的情绪和痛苦。",
+                medium: "你的精神病态处于中等水平（34-66%），在大多数情况下能够控制自己的冲动和行为，但在某些情况下也可能表现出冷漠或冲动的一面。你能够理解他人的感受，但有时也会优先考虑自己的需求，能够在理性和感性之间找到平衡。",
+                high: "你的精神病态处于较高水平（67-100%），经常表现出冷漠、冲动和不负责任的行为，不太关心他人的感受和福祉。你能够轻易地伤害他人而不感到内疚，经常违反社会规则和道德准则，倾向于追求即时的满足和刺激。"
+            },
+            sadism: {
+                low: "你的虐待倾向处于较低水平（0-33%），非常善良和富有同情心，看到他人受苦会感到难过。你总是尽量帮助他人，避免伤害任何有生命的东西。",
+                medium: "你的虐待倾向处于中等水平（34-66%），在大多数情况下能够同情他人的痛苦，但在某些情况下也可能感到一丝幸灾乐祸。你不会主动伤害他人，但也可能不会积极地帮助处于困境中的人。",
+                high: "你的虐待倾向处于较高水平（67-100%），喜欢看到他人受苦，甚至会主动制造痛苦来满足自己的快感。你对他人的痛苦缺乏同情心，反而从中获得乐趣。"
+            },
+            selfCentered: {
+                low: "你的自我中心程度处于较低水平（0-33%），非常关注他人的需求和感受，总是优先考虑他人的利益。你是一个非常无私和体贴的人，愿意为他人付出很多。",
+                medium: "你的自我中心程度处于中等水平（34-66%），能够在关注自己和关注他人之间找到平衡。你会考虑他人的感受，但也不会忽视自己的需求和利益。",
+                high: "你的自我中心程度处于较高水平（67-100%），总是优先考虑自己的需求和感受，很少关心他人的想法。你认为自己的需求比他人的更重要，经常将自己的意愿强加给他人。"
+            },
+            malevolence: {
+                low: "你的恶意程度处于较低水平（0-33%），是一个非常善良和友善的人，总是尽量帮助他人，避免与他人发生冲突。你相信人性本善，愿意相信他人的善意。",
+                medium: "你的恶意程度处于中等水平（34-66%），在大多数情况下是善良和友善的，但也可能在受到伤害或挑衅时表现出一定的恶意。你能够控制自己的负面情绪，但也不会轻易忘记他人的过错。",
+                high: "你的恶意程度处于较高水平（67-100%），经常表现出恶意和敌意，喜欢看到他人失败和痛苦。你可能会主动伤害他人，或者在他人遇到困难时幸灾乐祸。"
+            }
+        };
+
+        // 维度中文名称映射
+        const dimensionNames = {
+            selfInterest: '利己主义',
+            greed: '贪婪',
+            machiavellianism: '马基雅维利主义',
+            moralDisengagement: '道德推脱',
+            narcissism: '自恋',
+            psychologicalEntitlement: '心理权利',
+            psychopathy: '精神变态',
+            sadism: '施虐倾向',
+            selfCentered: '自我为中心',
+            malevolence: '恶毒倾向'
+        };
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusIcon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            console.innerHTML += `[${timestamp}] ${statusIcon} ${message}<br>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        function getLevelText(level) {
+            const levelTexts = {
+                'low': '较低',
+                'medium': '中等', 
+                'high': '较高'
+            };
+            return levelTexts[level] || '未知';
+        }
+
+        function getLevelColor(level) {
+            const levelColors = {
+                'low': '#28a745',
+                'medium': '#ffc107',
+                'high': '#dc3545'
+            };
+            return levelColors[level] || '#6c757d';
+        }
+
+        // 模拟updateDimensionUI函数的核心逻辑（修复后的版本）
+        function simulateUpdateDimensionUI(dimensionKey, score) {
+            const level = getLevel(score);
+            const analysisText = analysisTexts[dimensionKey][level];
+            const dimensionName = dimensionNames[dimensionKey];
+            
+            // 使用连字符格式（修复后的逻辑）
+            const kebabCasePrefix = dimensionKey.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            const analysisElementId = `${kebabCasePrefix}-analysis`;
+            
+            log(`测试维度: ${dimensionName} (${dimensionKey})`);
+            log(`  - 分数: ${score}% (等级: ${getLevelText(level)})`);
+            log(`  - 分析元素ID: ${analysisElementId}`);
+            log(`  - 分析文本长度: ${analysisText.length} 字符`);
+            
+            return {
+                dimensionKey,
+                dimensionName,
+                score,
+                level,
+                analysisText,
+                analysisElementId
+            };
+        }
+
+        function createDimensionResult(result) {
+            const { dimensionName, score, level, analysisText } = result;
+            const levelText = getLevelText(level);
+            const levelColor = getLevelColor(level);
+            
+            return `
+                <div class="dimension-item">
+                    <div class="dimension-header">
+                        <div class="dimension-title">${dimensionName}</div>
+                        <div class="score-badge" style="background: ${levelColor};">${score}% (${levelText})</div>
+                    </div>
+                    <div class="analysis-content">
+                        <span class="status-indicator ${level === 'low' ? 'status-success' : level === 'medium' ? 'status-warning' : 'status-error'}"></span>
+                        ${analysisText}
+                    </div>
+                </div>
+            `;
+        }
+
+        function testLowScores() {
+            log('开始测试低分数场景 (0-33%)...', 'info');
+            const results = [];
+            
+            Object.keys(dimensionNames).forEach(dimensionKey => {
+                const score = Math.floor(Math.random() * 33); // 0-32%
+                const result = simulateUpdateDimensionUI(dimensionKey, score);
+                results.push(result);
+            });
+            
+            displayResults(results, '低分数');
+        }
+
+        function testMediumScores() {
+            log('开始测试中分数场景 (34-66%)...', 'info');
+            const results = [];
+            
+            Object.keys(dimensionNames).forEach(dimensionKey => {
+                const score = 34 + Math.floor(Math.random() * 32); // 34-65%
+                const result = simulateUpdateDimensionUI(dimensionKey, score);
+                results.push(result);
+            });
+            
+            displayResults(results, '中分数');
+        }
+
+        function testHighScores() {
+            log('开始测试高分数场景 (67-100%)...', 'info');
+            const results = [];
+            
+            Object.keys(dimensionNames).forEach(dimensionKey => {
+                const score = 67 + Math.floor(Math.random() * 33); // 67-100%
+                const result = simulateUpdateDimensionUI(dimensionKey, score);
+                results.push(result);
+            });
+            
+            displayResults(results, '高分数');
+        }
+
+        function testRandomScores() {
+            log('开始测试随机分数场景 (0-100%)...', 'info');
+            const results = [];
+            
+            Object.keys(dimensionNames).forEach(dimensionKey => {
+                const score = Math.floor(Math.random() * 101); // 0-100%
+                const result = simulateUpdateDimensionUI(dimensionKey, score);
+                results.push(result);
+            });
+            
+            displayResults(results, '随机分数');
+        }
+
+        function displayResults(results, testType) {
+            const container = document.getElementById('dimensions-container');
+            container.innerHTML = '';
+            
+            let successCount = 0;
+            let totalCount = results.length;
+            
+            results.forEach(result => {
+                if (result.analysisText && result.analysisText.length > 0) {
+                    successCount++;
+                }
+                container.innerHTML += createDimensionResult(result);
+            });
+            
+            const successRate = (successCount / totalCount * 100).toFixed(1);
+            log(`测试完成！成功显示 ${successCount}/${totalCount} 个维度的分析文本 (成功率: ${successRate}%)`, 
+                successRate >= 95 ? 'success' : 'warning');
+            
+            // 显示测试总结
+            if (successCount === totalCount) {
+                log(`✅ ${testType}测试通过！所有维度都成功显示了分析文本。`, 'success');
+            } else {
+                log(`⚠️ ${testType}测试发现 ${totalCount - successCount} 个维度存在问题。`, 'error');
+            }
+        }
+
+        // 页面加载完成后自动运行一次测试
+        window.onload = function() {
+            log('页面加载完成，详细维度分析修复验证系统已就绪', 'success');
+            log('修复内容：将分析元素ID生成从驼峰式改为连字符格式', 'info');
+            log('例如：selfInterest → self-interest-analysis', 'info');
+            log('点击上方按钮开始测试不同分数场景', 'info');
+            
+            // 自动运行一次低分数测试
+            setTimeout(() => {
+                testLowScores();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

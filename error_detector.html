@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错误检测器</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error-log { background: #fee; border: 1px solid #fcc; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success-log { background: #efe; border: 1px solid #cfc; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .log-entry { margin: 5px 0; padding: 5px; background: #f5f5f5; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>综合测试页面错误检测</h1>
+    
+    <div id="error-container">
+        <h3>检测到的错误：</h3>
+        <div id="errors"></div>
+    </div>
+    
+    <div id="success-container">
+        <h3>成功加载的组件：</h3>
+        <div id="successes"></div>
+    </div>
+    
+    <div id="debug-info">
+        <h3>调试信息：</h3>
+        <div id="debug"></div>
+    </div>
+
+    <script>
+        // 捕获所有错误
+        const errors = [];
+        const successes = [];
+        const debugInfo = [];
+        
+        window.addEventListener('error', function(event) {
+            errors.push({
+                message: event.message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                error: event.error
+            });
+        });
+        
+        // 检测变量冲突
+        function checkVariableConflicts() {
+            debugInfo.push('检查变量冲突...');
+            
+            // 检查常见的冲突变量
+            const variablesToCheck = ['dimensionNames', 'analysisTexts', 'testScores'];
+            
+            variablesToCheck.forEach(varName => {
+                if (typeof window[varName] !== 'undefined') {
+                    debugInfo.push(`${varName}: 已定义，类型: ${typeof window[varName]}`);
+                    if (typeof window[varName] === 'object') {
+                        debugInfo.push(`${varName} 键数量: ${Object.keys(window[varName]).length}`);
+                    }
+                } else {
+                    debugInfo.push(`${varName}: 未定义`);
+                }
+            });
+        }
+        
+        // 尝试加载外部脚本并检测问题
+        function loadAndCheckScripts() {
+            debugInfo.push('开始加载脚本检测...');
+            
+            // 创建脚本元素来加载auto_test_scores.js
+            const script = document.createElement('script');
+            script.src = 'auto_test_scores.js';
+            
+            script.onload = function() {
+                successes.push('auto_test_scores.js 加载成功');
+                checkVariableConflicts();
+                validateDataIntegrity();
+                displayResults();
+            };
+            
+            script.onerror = function() {
+                errors.push({
+                    message: '无法加载 auto_test_scores.js',
+                    filename: 'auto_test_scores.js',
+                    lineno: 0,
+                    colno: 0
+                });
+                displayResults();
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // 验证数据完整性
+        function validateDataIntegrity() {
+            debugInfo.push('验证数据完整性...');
+            
+            if (typeof window.dimensionNames !== 'undefined') {
+                const expectedKeys = [
+                    'selfInterest', 'greed', 'machiavellianism', 'moralDisengagement',
+                    'narcissism', 'psychologicalEntitlement', 'psychopathy', 'sadism',
+                    'selfCentered', 'malevolence'
+                ];
+                
+                const actualKeys = Object.keys(window.dimensionNames);
+                const missingKeys = expectedKeys.filter(key => !actualKeys.includes(key));
+                
+                if (missingKeys.length > 0) {
+                    errors.push({
+                        message: `dimensionNames 缺少键: ${missingKeys.join(', ')}`,
+                        filename: 'data validation',
+                        lineno: 0,
+                        colno: 0
+                    });
+                } else {
+                    successes.push('dimensionNames 数据完整');
+                }
+            }
+            
+            if (typeof window.analysisTexts !== 'undefined') {
+                Object.keys(window.dimensionNames || {}).forEach(dimension => {
+                    if (!window.analysisTexts[dimension]) {
+                        errors.push({
+                            message: `analysisTexts 缺少维度: ${dimension}`,
+                            filename: 'data validation',
+                            lineno: 0,
+                            colno: 0
+                        });
+                    } else {
+                        const levels = ['low', 'medium', 'high'];
+                        const missingLevels = levels.filter(level => !window.analysisTexts[dimension][level]);
+                        
+                        if (missingLevels.length > 0) {
+                            errors.push({
+                                message: `analysisTexts.${dimension} 缺少等级: ${missingLevels.join(', ')}`,
+                                filename: 'data validation',
+                                lineno: 0,
+                                colno: 0
+                            });
+                        }
+                    }
+                });
+                
+                if (errors.filter(e => e.filename === 'data validation').length === 0) {
+                    successes.push('analysisTexts 数据完整');
+                }
+            }
+        }
+        
+        // 显示结果
+        function displayResults() {
+            // 显示错误
+            const errorsDiv = document.getElementById('errors');
+            if (errors.length > 0) {
+                errorsDiv.innerHTML = errors.map(error => `
+                    <div class="error-log">
+                        <strong>错误:</strong> ${error.message}<br>
+                        <strong>文件:</strong> ${error.filename}<br>
+                        <strong>位置:</strong> 行 ${error.lineno}, 列 ${error.colno}
+                    </div>
+                `).join('');
+            } else {
+                errorsDiv.innerHTML = '<div class="success-log">未检测到错误 ✅</div>';
+            }
+            
+            // 显示成功
+            const successesDiv = document.getElementById('successes');
+            if (successes.length > 0) {
+                successesDiv.innerHTML = successes.map(success => `
+                    <div class="success-log">${success}</div>
+                `).join('');
+            } else {
+                successesDiv.innerHTML = '<div class="log-entry">暂无成功信息</div>';
+            }
+            
+            // 显示调试信息
+            const debugDiv = document.getElementById('debug');
+            debugDiv.innerHTML = debugInfo.map(info => `
+                <div class="log-entry">${info}</div>
+            `).join('');
+        }
+        
+        // 页面加载完成后开始检测
+        document.addEventListener('DOMContentLoaded', loadAndCheckScripts);
+    </script>
+</body>
+</html>

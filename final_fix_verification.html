@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ 最终修复验证 - 详细维度分析显示</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dimension {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #4ECDC4;
+        }
+        .dimension h4 {
+            margin: 0 0 10px 0;
+            color: #FFD700;
+        }
+        .score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00FF7F;
+            margin: 5px 0;
+        }
+        .analysis {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            min-height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin: 5px 0;
+            display: inline-block;
+        }
+        .success { background: rgba(0, 255, 0, 0.3); color: #00FF00; }
+        .error { background: rgba(255, 0, 0, 0.3); color: #FF6B6B; }
+        .warning { background: rgba(255, 165, 0, 0.3); color: #FFA500; }
+        button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 5px;
+            transition: transform 0.3s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .test-results {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .fix-summary {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .element-id {
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ 最终修复验证</h1>
+            <h2>详细维度分析显示问题修复确认</h2>
+            <p>验证马基雅维利主义、自恋、精神变态三个维度的分析文本是否正确显示</p>
+        </div>
+        
+        <div class="fix-summary">
+            <h3>🔧 修复总结</h3>
+            <p><strong>问题原因：</strong>三个维度的函数调用参数与HTML元素ID不匹配</p>
+            <p><strong>修复方案：</strong></p>
+            <ol>
+                <li>移除函数调用中的多余第三个参数（elementIdPrefix）</li>
+                <li>统一HTML元素ID格式，移除分数和进度条元素的"-detail"后缀</li>
+            </ol>
+            <p><strong>影响范围：</strong>结果分析页面的详细维度分析区域</p>
+        </div>
+        
+        <button onclick="runFullTest()">运行完整验证测试</button>
+        <button onclick="clearResults()">清除结果</button>
+        <button onclick="showElementIds()">显示元素ID映射</button>
+        
+        <div class="test-results" id="testLog"></div>
+        
+        <div class="status-card">
+            <h3>📊 维度测试状态</h3>
+            <div id="dimensions-status">
+                <div class="dimension">
+                    <h4>🎭 马基雅维利主义</h4>
+                    <div class="score" id="machiavellianism-score-display">等待测试...</div>
+                    <div class="analysis" id="machiavellianism-analysis-display">等待测试...</div>
+                    <div id="machiavellianism-status"></div>
+                </div>
+                
+                <div class="dimension">
+                    <h4>💫 自恋</h4>
+                    <div class="score" id="narcissism-score-display">等待测试...</div>
+                    <div class="analysis" id="narcissism-analysis-display">等待测试...</div>
+                    <div id="narcissism-status"></div>
+                </div>
+                
+                <div class="dimension">
+                    <h4>🧠 精神变态</h4>
+                    <div class="score" id="psychopathy-score-display">等待测试...</div>
+                    <div class="analysis" id="psychopathy-analysis-display">等待测试...</div>
+                    <div id="psychopathy-status"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3>🔍 元素ID一致性检查</h3>
+            <div id="element-consistency-check">
+                <p>点击"显示元素ID映射"按钮查看详细的元素ID匹配情况</p>
+            </div>
+        </div>
+        
+        <div id="overall-result"></div>
+    </div>
+
+    <script>
+        // 模拟用户分数数据
+        const userScores = {
+            machiavellianism: 65,
+            narcissism: 45,
+            psychopathy: 25
+        };
+        
+        // 分析文本数据
+        const analysisTexts = {
+            machiavellianism: {
+                low: '你的马基雅维利主义倾向较低，表明你是一个诚实正直的人，倾向于直接和透明的方式处理人际关系。',
+                medium: '你的马基雅维利主义倾向处于中等水平，表明你在人际交往中具有一定的策略性思维，但仍有道德底线。',
+                high: '你的马基雅维利主义倾向较高，表明你在人际交往中倾向于使用策略和手段，需要注意保持道德平衡。'
+            },
+            narcissism: {
+                low: '你的自恋程度较低，表明你是一个谦逊的人，不太需要他人的关注和认可。',
+                medium: '你的自恋程度处于中等水平，表明你有适度的自信，但不会过度自我中心。',
+                high: '你的自恋程度较高，表明你非常需要他人的关注和认可，需要注意培养同理心。'
+            },
+            psychopathy: {
+                low: '你的精神变态倾向较低，表明你有良好的同理心和情感连接能力。',
+                medium: '你的精神变态倾向处于中等水平，表明你在理性和情感之间有一定平衡。',
+                high: '你的精神变态倾向较高，表明你可能缺乏同理心，需要注意培养情感连接能力。'
+            }
+        };
+        
+        function log(message) {
+            const logEl = document.getElementById('testLog');
+            logEl.innerHTML += new Date().toLocaleTimeString() + ' - ' + message + '<br>';
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+        
+        function updateStatus(dimension, success, message) {
+            const statusEl = document.getElementById(dimension + '-status');
+            statusEl.className = 'status ' + (success ? 'success' : 'error');
+            statusEl.textContent = message;
+        }
+        
+        function updateDisplay(dimension, score, analysis) {
+            document.getElementById(dimension + '-score-display').textContent = `分数: ${score}%`;
+            document.getElementById(dimension + '-analysis-display').textContent = analysis;
+        }
+        
+        // 修复后的 updateDimensionUI 函数
+        function updateDimensionUI(dimensionKey, dimensionName, elementIdPrefix = null) {
+            log(`测试 ${dimensionKey} (${dimensionName})`);
+            
+            const prefix = elementIdPrefix || dimensionKey;
+            const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            
+            log(`  使用前缀: ${prefix} -> ${kebabCasePrefix}`);
+            
+            const scoreElement = document.getElementById(`${kebabCasePrefix}-score`);
+            const barElement = document.getElementById(`${kebabCasePrefix}-bar`);
+            const analysisElement = document.getElementById(`${kebabCasePrefix}-analysis`);
+            
+            log(`  查找元素: ${kebabCasePrefix}-score, ${kebabCasePrefix}-bar, ${kebabCasePrefix}-analysis`);
+            
+            let success = true;
+            let results = {
+                scoreFound: !!scoreElement,
+                barFound: !!barElement,
+                analysisFound: !!analysisElement,
+                scoreUpdated: false,
+                analysisUpdated: false
+            };
+            
+            // 更新分数
+            if (scoreElement) {
+                const score = userScores[dimensionKey];
+                scoreElement.textContent = `${score}%`;
+                results.scoreUpdated = true;
+                log(`  ✓ 分数元素找到并更新: ${score}%`);
+            } else {
+                log(`  ✗ 分数元素未找到: ${kebabCasePrefix}-score`);
+                success = false;
+            }
+            
+            // 更新进度条
+            if (barElement) {
+                const score = userScores[dimensionKey];
+                barElement.style.width = `${score}%`;
+                log(`  ✓ 进度条元素找到并更新: ${score}%`);
+            } else {
+                log(`  ✗ 进度条元素未找到: ${kebabCasePrefix}-bar`);
+                success = false;
+            }
+            
+            // 更新分析文本
+            if (analysisElement) {
+                const score = userScores[dimensionKey];
+                const level = getLevel(score);
+                const analysisText = analysisTexts[dimensionKey][level];
+                analysisElement.textContent = analysisText;
+                results.analysisUpdated = true;
+                updateDisplay(dimensionKey, score, analysisText);
+                log(`  ✓ 分析元素找到并更新: ${level}级`);
+            } else {
+                log(`  ✗ 分析元素未找到: ${kebabCasePrefix}-analysis`);
+                success = false;
+            }
+            
+            updateStatus(dimensionKey, success, success ? '修复成功 - 所有元素正确匹配' : '修复失败 - 元素匹配错误');
+            return { success, results };
+        }
+        
+        function runFullTest() {
+            log('开始完整验证测试...');
+            log('使用修复后的 updateDimensionUI 函数（无第三个参数）');
+            
+            const results = [];
+            
+            // 测试三个问题维度（修复后的调用方式）
+            results.push(updateDimensionUI('machiavellianism', '马基雅维利主义'));
+            results.push(updateDimensionUI('narcissism', '自恋'));
+            results.push(updateDimensionUI('psychopathy', '精神变态'));
+            
+            const allSuccess = results.every(r => r.success);
+            const successCount = results.filter(r => r.success).length;
+            
+            const overallEl = document.getElementById('overall-result');
+            overallEl.innerHTML = `
+                <div class="status-card">
+                    <h3>🎯 总体测试结果</h3>
+                    <div class="status ${allSuccess ? 'success' : (successCount > 0 ? 'warning' : 'error')}">
+                        ${allSuccess ? '✅ 全部修复成功！' : (successCount > 0 ? '⚠️ 部分修复成功' : '❌ 修复失败')}
+                    </div>
+                    <p>测试结果：${successCount}/3 个维度修复成功</p>
+                    ${allSuccess ? '<p>🎉 所有详细维度分析文本现在都能正确显示了！</p>' : '<p>❗ 仍有部分问题需要解决</p>'}
+                </div>
+            `;
+            
+            log(`测试完成：${successCount}/3 个维度成功`);
+            log(allSuccess ? '修复验证成功！' : '仍有部分问题需要解决');
+        }
+        
+        function showElementIds() {
+            const consistencyEl = document.getElementById('element-consistency-check');
+            
+            const elementMappings = [
+                {
+                    dimension: 'machiavellianism',
+                    elements: ['score', 'bar', 'analysis'],
+                    expectedIds: ['machiavellianism-score', 'machiavellianism-bar', 'machiavellianism-analysis']
+                },
+                {
+                    dimension: 'narcissism', 
+                    elements: ['score', 'bar', 'analysis'],
+                    expectedIds: ['narcissism-score', 'narcissism-bar', 'narcissism-analysis']
+                },
+                {
+                    dimension: 'psychopathy',
+                    elements: ['score', 'bar', 'analysis'], 
+                    expectedIds: ['psychopathy-score', 'psychopathy-bar', 'psychopathy-analysis']
+                }
+            ];
+            
+            let html = '<h4>元素ID映射检查</h4>';
+            
+            elementMappings.forEach(mapping => {
+                html += `<div style="margin: 15px 0; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">`;
+                html += `<h5 style="color: #FFD700; margin: 0 0 10px 0;">${mapping.dimension}</h5>`;
+                
+                mapping.elements.forEach((element, index) => {
+                    const expectedId = mapping.expectedIds[index];
+                    const actualElement = document.getElementById(expectedId);
+                    const status = actualElement ? '✅' : '❌';
+                    const statusClass = actualElement ? 'success' : 'error';
+                    
+                    html += `<div style="margin: 5px 0;">`;
+                    html += `${status} <span class="element-id">${expectedId}</span> `;
+                    html += `<span class="status ${statusClass}">${actualElement ? '找到' : '未找到'}</span>`;
+                    html += `</div>`;
+                });
+                
+                html += '</div>';
+            });
+            
+            consistencyEl.innerHTML = html;
+            log('显示了元素ID映射检查');
+        }
+        
+        function clearResults() {
+            document.getElementById('testLog').innerHTML = '';
+            document.getElementById('overall-result').innerHTML = '';
+            document.getElementById('element-consistency-check').innerHTML = '<p>点击"显示元素ID映射"按钮查看详细的元素ID匹配情况</p>';
+            
+            // 重置显示
+            ['machiavellianism', 'narcissism', 'psychopathy'].forEach(dimension => {
+                document.getElementById(dimension + '-score-display').textContent = '等待测试...';
+                document.getElementById(dimension + '-analysis-display').textContent = '等待测试...';
+                document.getElementById(dimension + '-status').innerHTML = '';
+            });
+        }
+        
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('最终修复验证页面加载完成');
+            log('准备验证详细维度分析显示修复效果');
+            log('点击"运行完整验证测试"按钮开始验证');
+        };
+    </script>
+</body>
+</html>

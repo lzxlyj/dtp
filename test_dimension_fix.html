@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>详细维度分析修复测试</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .dimension-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .score-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #9d4edd;
+        }
+        .bar-container {
+            width: 200px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9d4edd, #c77dff);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+        .analysis-text {
+            font-size: 14px;
+            color: #dee2e6;
+            margin-top: 10px;
+        }
+        .test-button {
+            background: linear-gradient(90deg, #9d4edd, #c77dff);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.5);
+            color: #28a745;
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+            color: #dc3545;
+        }
+        .console-output {
+            background: rgba(0, 0, 0, 0.5);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>详细维度分析修复测试</h1>
+        <p>此页面用于测试详细维度分析的修复效果，确保所有维度的分数、进度条和分析文本都能正确显示。</p>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="test-button" onclick="testAllDimensions()">测试所有维度</button>
+            <button class="test-button" onclick="clearResults()">清除结果</button>
+            <button class="test-button" onclick="showConsoleOutput()">显示控制台输出</button>
+        </div>
+        
+        <div id="test-status"></div>
+        <div id="test-results"></div>
+        <div id="console-output" class="console-output" style="display: none;"></div>
+        
+        <!-- 详细维度分析区域 -->
+        <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-accent">详细维度分析</h2>
+            
+            <!-- 利己主义 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">利己主义</h3>
+                    <div class="flex items-center">
+                        <span id="self-interest-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="self-interest-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="self-interest-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 贪婪 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">贪婪</h3>
+                    <div class="flex items-center">
+                        <span id="greed-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="greed-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="greed-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 马基雅维利主义 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">马基雅维利主义</h3>
+                    <div class="flex items-center">
+                        <span id="machiavellianism-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="machiavellianism-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="machiavellianism-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 道德推脱 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">道德推脱</h3>
+                    <div class="flex items-center">
+                        <span id="moral-disengagement-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="moral-disengagement-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="moral-disengagement-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 自恋 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">自恋</h3>
+                    <div class="flex items-center">
+                        <span id="narcissism-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="narcissism-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="narcissism-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 心理权利 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">心理权利</h3>
+                    <div class="flex items-center">
+                        <span id="psychological-entitlement-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="psychological-entitlement-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="psychological-entitlement-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 精神变态 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">精神变态</h3>
+                    <div class="flex items-center">
+                        <span id="psychopathy-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="psychopathy-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="psychopathy-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 施虐倾向 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">施虐倾向</h3>
+                    <div class="flex items-center">
+                        <span id="sadism-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="sadism-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="sadism-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 自我为中心 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">自我为中心</h3>
+                    <div class="flex items-center">
+                        <span id="self-centered-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="self-centered-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="self-centered-analysis" class="analysis-text">等待测试...</p>
+            </div>
+            
+            <!-- 恶毒倾向 -->
+            <div class="dimension-item">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-medium">恶毒倾向</h3>
+                    <div class="flex items-center">
+                        <span id="malevolence-score" class="score-display mr-2">0%</span>
+                        <div class="bar-container">
+                            <div id="malevolence-bar" class="bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p id="malevolence-analysis" class="analysis-text">等待测试...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="optimized_scoring.js"></script>
+    <script>
+        // 捕获控制台输出
+        let consoleLogs = [];
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            consoleLogs.push(args.join(' '));
+            originalConsoleLog.apply(console, args);
+        };
+
+        // 测试所有维度
+        function testAllDimensions() {
+            consoleLogs = [];
+            const statusEl = document.getElementById('test-status');
+            const resultsEl = document.getElementById('test-results');
+            
+            statusEl.innerHTML = '<div class="status">正在测试详细维度分析...</div>';
+            
+            // 模拟测试分数
+            const testScores = {
+                selfInterest: 45,
+                greed: 30,
+                machiavellianism: 60,
+                moralDisengagement: 25,
+                narcissism: 55,
+                psychologicalEntitlement: 40,
+                psychopathy: 35,
+                sadism: 20,
+                selfCentered: 50,
+                malevolence: 15
+            };
+            
+            // 设置测试分数
+            Object.assign(userScores, testScores);
+            
+            // 调用更新函数
+            try {
+                updateDimensionUI('selfInterest');
+                updateDimensionUI('greed');
+                updateDimensionUI('machiavellianism', '马基雅维利主义');
+                updateDimensionUI('moralDisengagement');
+                updateDimensionUI('narcissism', '自恋');
+                updateDimensionUI('psychologicalEntitlement');
+                updateDimensionUI('psychopathy', '精神变态');
+                updateDimensionUI('sadism');
+                updateDimensionUI('selfCentered');
+                updateDimensionUI('malevolence');
+                
+                // 检查所有元素是否更新成功
+                const dimensions = [
+                    {key: 'selfInterest', name: '利己主义'},
+                    {key: 'greed', name: '贪婪'},
+                    {key: 'machiavellianism', name: '马基雅维利主义'},
+                    {key: 'moralDisengagement', name: '道德推脱'},
+                    {key: 'narcissism', name: '自恋'},
+                    {key: 'psychologicalEntitlement', name: '心理权利'},
+                    {key: 'psychopathy', name: '精神变态'},
+                    {key: 'sadism', name: '施虐倾向'},
+                    {key: 'selfCentered', name: '自我为中心'},
+                    {key: 'malevolence', name: '恶毒倾向'}
+                ];
+                
+                let successCount = 0;
+                let totalCount = dimensions.length;
+                let resultsHtml = '';
+                
+                dimensions.forEach(dim => {
+                    const expectedScore = testScores[dim.key];
+                    const scoreEl = document.getElementById(getElementId(dim.key) + '-score');
+                    const barEl = document.getElementById(getElementId(dim.key) + '-bar');
+                    const analysisEl = document.getElementById(getElementId(dim.key) + '-analysis');
+                    
+                    const scoreText = scoreEl ? scoreEl.textContent : '未找到';
+                    const barWidth = barEl ? barEl.style.width : '未找到';
+                    const analysisText = analysisEl ? analysisEl.textContent : '未找到';
+                    
+                    const scoreMatch = scoreText === `${expectedScore}%`;
+                    const barMatch = barWidth === `${expectedScore}%`;
+                    const analysisMatch = analysisText !== '未找到' && analysisText !== '';
+                    
+                    const allMatch = scoreMatch && barMatch && analysisMatch;
+                    
+                    if (allMatch) successCount++;
+                    
+                    resultsHtml += `
+                        <div class="dimension-item">
+                            <h4>${dim.name} (${dim.key})</h4>
+                            <p>期望分数: ${expectedScore}% | 实际分数: ${scoreText} ${scoreMatch ? '✅' : '❌'}</p>
+                            <p>进度条宽度: ${barWidth} ${barMatch ? '✅' : '❌'}</p>
+                            <p>分析文本: ${analysisMatch ? '已加载' : '未找到'} ${analysisMatch ? '✅' : '❌'}</p>
+                        </div>
+                    `;
+                });
+                
+                const successRate = (successCount / totalCount * 100).toFixed(1);
+                const statusClass = successRate >= 90 ? 'success' : successRate >= 70 ? 'status' : 'error';
+                
+                statusEl.innerHTML = `<div class="${statusClass}">测试结果: ${successCount}/${totalCount} 通过 (${successRate}%)</div>`;
+                resultsEl.innerHTML = resultsHtml;
+                
+            } catch (error) {
+                statusEl.innerHTML = `<div class="error">测试出错: ${error.message}</div>`;
+                console.error('测试错误:', error);
+            }
+        }
+        
+        // 获取元素ID
+        function getElementId(dimensionKey) {
+            const specialCases = {
+                'moralDisengagement': 'moral-disengagement',
+                'psychologicalEntitlement': 'psychological-entitlement',
+                'selfInterest': 'self-interest',
+                'selfCentered': 'self-centered'
+            };
+            
+            if (specialCases[dimensionKey]) {
+                return specialCases[dimensionKey];
+            }
+            
+            return dimensionKey.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+        }
+        
+        // 清除结果
+        function clearResults() {
+            const dimensions = ['self-interest', 'greed', 'machiavellianism', 'moral-disengagement', 
+                                'narcissism', 'psychological-entitlement', 'psychopathy', 'sadism', 
+                                'self-centered', 'malevolence'];
+            
+            dimensions.forEach(id => {
+                const scoreEl = document.getElementById(id + '-score');
+                const barEl = document.getElementById(id + '-bar');
+                const analysisEl = document.getElementById(id + '-analysis');
+                
+                if (scoreEl) scoreEl.textContent = '0%';
+                if (barEl) barEl.style.width = '0%';
+                if (analysisEl) analysisEl.textContent = '等待测试...';
+            });
+            
+            document.getElementById('test-status').innerHTML = '';
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('console-output').style.display = 'none';
+        }
+        
+        // 显示控制台输出
+        function showConsoleOutput() {
+            const outputEl = document.getElementById('console-output');
+            outputEl.innerHTML = consoleLogs.join('<br>');
+            outputEl.style.display = outputEl.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // 页面加载完成后自动测试
+        window.addEventListener('load', function() {
+            setTimeout(testAllDimensions, 1000);
+        });
+    </script>
+</body>
+</html>

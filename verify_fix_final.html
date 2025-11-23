@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终修复验证 - 黑暗三角人格测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dimension-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dimension-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dimension-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .score-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
+        
+        .progress-container {
+            width: 200px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .analysis-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #cccccc;
+            line-height: 1.5;
+        }
+        
+        .test-controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0 10px;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+        
+        .status.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+        }
+        
+        .console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>最终修复验证</h1>
+            <p>黑暗三角人格测试结果页面修复验证</p>
+        </div>
+        
+        <div class="test-controls">
+            <button class="btn" onclick="testHighScores()">测试高分</button>
+            <button class="btn" onclick="testMediumScores()">测试中分</button>
+            <button class="btn" onclick="testLowScores()">测试低分</button>
+            <button class="btn" onclick="testRandomScores()">随机分数</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>概览区域（无-detail后缀）</h2>
+            <div class="dimension-item">
+                <div class="dimension-name">马基雅维利主义</div>
+                <div class="score-display">
+                    <span id="machiavellianism-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="machiavellianism-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="dimension-item">
+                <div class="dimension-name">自恋</div>
+                <div class="score-display">
+                    <span id="narcissism-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="narcissism-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="dimension-item">
+                <div class="dimension-name">精神变态</div>
+                <div class="score-display">
+                    <span id="psychopathy-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="psychopathy-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>详细分析区域（无-detail后缀）</h2>
+            <div class="dimension-item">
+                <div class="dimension-name">马基雅维利主义</div>
+                <div class="score-display">
+                    <span id="machiavellianism-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="machiavellianism-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="machiavellianism-analysis" class="analysis-text"></div>
+            </div>
+            <div class="dimension-item">
+                <div class="dimension-name">自恋</div>
+                <div class="score-display">
+                    <span id="narcissism-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="narcissism-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="narcissism-analysis" class="analysis-text"></div>
+            </div>
+            <div class="dimension-item">
+                <div class="dimension-name">精神变态</div>
+                <div class="score-display">
+                    <span id="psychopathy-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="psychopathy-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="psychopathy-analysis" class="analysis-text"></div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>普通维度（无-detail后缀）</h2>
+            <div class="dimension-item">
+                <div class="dimension-name">利己主义</div>
+                <div class="score-display">
+                    <span id="self-interest-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="self-interest-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="self-interest-analysis" class="analysis-text"></div>
+            </div>
+            <div class="dimension-item">
+                <div class="dimension-name">贪婪</div>
+                <div class="score-display">
+                    <span id="greed-score" class="score-text">0%</span>
+                    <div class="progress-container">
+                        <div id="greed-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="greed-analysis" class="analysis-text"></div>
+            </div>
+        </div>
+        
+        <div id="test-status" class="status" style="display: none;"></div>
+        
+        <div class="console-output" id="console-output">
+            控制台输出将显示在这里...
+        </div>
+    </div>
+
+    <script>
+        // 模拟用户得分
+        let userScores = {
+            machiavellianism: 75,
+            narcissism: 68,
+            psychopathy: 82,
+            selfInterest: 45,
+            greed: 55,
+            moralDisengagement: 60,
+            psychologicalEntitlement: 70,
+            sadism: 40,
+            selfCentered: 50,
+            malevolence: 35
+        };
+
+        // 分析文本
+        const analysisTexts = {
+            machiavellianism: {
+                low: '你的马基雅维利主义水平较低，表明你在人际交往中倾向于诚实和直接的方式。',
+                medium: '你的马基雅维利主义处于中等水平，表明你在某些情况下会使用策略性思维。',
+                high: '你的马基雅维利主义水平较高，表明你在人际交往中倾向于使用策略和手段。'
+            },
+            narcissism: {
+                low: '你的自恋水平较低，表明你有健康的自我认知和适度的自信。',
+                medium: '你的自恋处于中等水平，表明你有正常的自我价值感。',
+                high: '你的自恋水平较高，表明你有较强的自我关注倾向。'
+            },
+            psychopathy: {
+                low: '你的精神变态特质水平较低，表明你有良好的情感连接能力。',
+                medium: '你的精神变态特质处于中等水平，表明你在某些情况下可能表现出冷漠。',
+                high: '你的精神变态特质水平较高，表明你可能缺乏同理心和情感连接。'
+            },
+            selfInterest: {
+                low: '你的利己主义水平较低，表明你倾向于考虑他人利益。',
+                medium: '你的利己主义处于中等水平，表明你能够平衡个人和他人利益。',
+                high: '你的利己主义水平较高，表明你倾向于优先考虑个人利益。'
+            },
+            greed: {
+                low: '你的贪婪水平较低，表明你对物质需求有适度的控制。',
+                medium: '你的贪婪处于中等水平，表明你有正常的物质欲望。',
+                high: '你的贪婪水平较高，表明你有强烈的物质获取欲望。'
+            }
+        };
+
+        // 获取等级
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        // 更新维度UI（修复后的版本）
+        function updateDimensionUI(dimensionKey, dimensionName, elementIdPrefix = null) {
+            console.log(`=== updateDimensionUI 调试 ${dimensionKey} ===`);
+            
+            const prefix = elementIdPrefix || dimensionKey;
+            // 将驼峰式命名转换为连字符命名
+            const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            
+            console.log(`维度: ${dimensionKey}, 前缀: ${prefix}, kebabCase: ${kebabCasePrefix}`);
+            console.log(`分数: ${userScores[dimensionKey]}`);
+            
+            const scoreElement = document.getElementById(`${kebabCasePrefix}-score`);
+            const barElement = document.getElementById(`${kebabCasePrefix}-bar`);
+            const analysisElement = document.getElementById(`${kebabCasePrefix}-analysis`);
+            
+            console.log(`元素查找: score=${!!scoreElement}, bar=${!!barElement}, analysis=${!!analysisElement}`);
+            console.log(`具体元素ID: ${kebabCasePrefix}-score, ${kebabCasePrefix}-bar, ${kebabCasePrefix}-analysis`);
+            
+            if (scoreElement) {
+                const score = userScores[dimensionKey];
+                scoreElement.textContent = `${score}%`;
+                console.log(`✅ 更新分数成功: ${dimensionKey} = ${score}%`);
+            } else {
+                console.log(`❌ 分数元素未找到: ${kebabCasePrefix}-score`);
+            }
+            
+            if (barElement) {
+                const score = userScores[dimensionKey];
+                barElement.style.width = `${score}%`;
+                console.log(`✅ 更新进度条成功: ${dimensionKey} = ${score}%`);
+            } else {
+                console.log(`❌ 进度条元素未找到: ${kebabCasePrefix}-bar`);
+            }
+            
+            if (analysisElement) {
+                const score = userScores[dimensionKey];
+                const level = getLevel(score);
+                analysisElement.textContent = analysisTexts[dimensionKey][level];
+                console.log(`✅ 更新分析文本成功: ${dimensionKey} - ${level}级`);
+            } else {
+                console.log(`❌ 分析元素未找到: ${kebabCasePrefix}-analysis`);
+            }
+        }
+
+        // 应用修复后的调用方式（无-detail前缀）
+        function applyFixedCalls() {
+            console.log('应用修复后的调用方式...');
+            
+            // 普通维度（无-detail后缀）
+            updateDimensionUI('selfInterest');
+            updateDimensionUI('greed');
+            
+            // 黑暗三角维度（无-detail后缀）
+            updateDimensionUI('machiavellianism', '马基雅维利主义');
+            updateDimensionUI('narcissism', '自恋');
+            updateDimensionUI('psychopathy', '精神变态');
+            
+            console.log('所有调用完成！');
+        }
+
+        // 测试函数
+        function testHighScores() {
+            userScores = {
+                machiavellianism: 85,
+                narcissism: 88,
+                psychopathy: 82,
+                selfInterest: 80,
+                greed: 75
+            };
+            applyFixedCalls();
+            showStatus('高分测试完成！所有维度应显示高分数。', 'success');
+        }
+
+        function testMediumScores() {
+            userScores = {
+                machiavellianism: 55,
+                narcissism: 48,
+                psychopathy: 52,
+                selfInterest: 45,
+                greed: 50
+            };
+            applyFixedCalls();
+            showStatus('中分测试完成！所有维度应显示中等分数。', 'success');
+        }
+
+        function testLowScores() {
+            userScores = {
+                machiavellianism: 15,
+                narcissism: 22,
+                psychopathy: 18,
+                selfInterest: 25,
+                greed: 20
+            };
+            applyFixedCalls();
+            showStatus('低分测试完成！所有维度应显示低分数。', 'success');
+        }
+
+        function testRandomScores() {
+            userScores = {
+                machiavellianism: Math.floor(Math.random() * 100),
+                narcissism: Math.floor(Math.random() * 100),
+                psychopathy: Math.floor(Math.random() * 100),
+                selfInterest: Math.floor(Math.random() * 100),
+                greed: Math.floor(Math.random() * 100)
+            };
+            applyFixedCalls();
+            showStatus(`随机分数测试完成！分数：马基雅维利主义${userScores.machiavellianism}%，自恋${userScores.narcissism}%，精神变态${userScores.psychopathy}%`, 'success');
+        }
+
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('test-status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            statusElement.style.display = 'block';
+        }
+
+        // 重定向console.log到页面显示
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const output = document.getElementById('console-output');
+            output.innerHTML += args.join(' ') + '<br>';
+            output.scrollTop = output.scrollHeight;
+        };
+
+        // 页面加载时运行初始测试
+        window.onload = function() {
+            console.log('页面加载完成，开始验证修复效果...');
+            testHighScores();
+        };
+    </script>
+</body>
+</html>

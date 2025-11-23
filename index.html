@@ -1,0 +1,2374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黑暗三角人格3.0升级版 - SCL量子心理研究院</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6C1CD3', // 紫色主题
+                        secondary: '#1A1A1A', // 深黑色
+                        accent: '#9D4EDD', // 亮紫色
+                        dark: '#0A0A0A', // 黑色
+                        light: '#F8F9FA', // 白色
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            }
+            .text-glow {
+                text-shadow: 0 0 10px rgba(157, 78, 221, 0.7);
+            }
+            .bg-gradient-dark {
+                background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+            }
+            .bg-gradient-purple {
+                background: linear-gradient(135deg, #6C1CD3 0%, #9D4EDD 100%);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(157, 78, 221, 0.3);
+            }
+            .progress-bar {
+                transition: width 0.5s ease-in-out;
+            }
+            .option-hover {
+                transition: all 0.2s ease;
+            }
+            .option-hover:hover {
+                transform: translateX(5px);
+            }
+            .option-selected {
+                border-color: #9D4EDD;
+                background-color: rgba(157, 78, 221, 0.1);
+            }
+            .modal {
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+            .modal-content {
+                transition: transform 0.3s ease;
+            }
+            .modal.show {
+                opacity: 1;
+                visibility: visible;
+            }
+            .modal.show .modal-content {
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #0A0A0A;
+            color: #F8F9FA;
+            overflow-x: hidden;
+        }
+        
+        /* 背景图案 */
+        .bg-pattern {
+            background-image: url('https://p9-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/6d0ad874ba05488d9a27194203fba1fd~tplv-a9rns2rl98-image.image?rcl=20251115001901000233B5B1BBAE2F2013&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1765729181&x-signature=ztwV0WB6fYSCLRMctzGo%2Bzxsdnk%3D');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        /* 页面过渡动画 */
+        .page {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .page.hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+            position: absolute;
+        }
+        
+        /* 按钮动画 */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        /* 进度条动画 */
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        /* 卡片悬浮效果 */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(157, 78, 221, 0.3);
+        }
+        
+        /* 选项动画 */
+        .option {
+            transition: all 0.2s ease;
+        }
+        
+        .option:hover {
+            transform: translateX(5px);
+        }
+        
+        /* 雷达图样式 */
+        .radar-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* 加载动画 */
+        .loader {
+            border: 4px solid rgba(157, 78, 221, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #9D4EDD;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1A1A1A;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #6C1CD3;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9D4EDD;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #1A1A1A;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            transform: translateY(-20px);
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        /* 兑换码输入框样式 */
+        .code-input {
+            letter-spacing: 0.2em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-dark text-light">
+    <!-- 导航栏 -->
+    <nav class="bg-secondary bg-opacity-90 backdrop-blur-md fixed w-full z-50 border-b border-primary border-opacity-30">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <h1 class="text-xl font-bold text-glow text-primary">黑暗三角人格<span class="text-accent">3.0</span>升级版</h1>
+            </div>
+            <div class="hidden md:flex space-x-4">
+                <button id="btn-science" class="px-3 py-1 text-sm rounded hover:bg-primary hover:bg-opacity-20 transition">科学依据</button>
+                <button id="btn-privacy" class="px-3 py-1 text-sm rounded hover:bg-primary hover:bg-opacity-20 transition">隐私保护</button>
+                <button id="btn-process" class="px-3 py-1 text-sm rounded hover:bg-primary hover:bg-opacity-20 transition">测评流程</button>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-btn" class="text-light">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-secondary bg-opacity-95 backdrop-blur-md w-full border-b border-primary border-opacity-30">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-2">
+                <button id="mobile-btn-science" class="px-3 py-2 text-sm rounded hover:bg-primary hover:bg-opacity-20 transition text-left">科学依据</button>
+                <button id="mobile-btn-privacy" class="px-3 py-2 text-sm rounded hover:bg-primary hover:bg-opacity-20 transition text-left">隐私保护</button>
+                <button id="mobile-btn-process" class="px-3 py-2 text-sm rounded hover:bg-primary hover:bg-opacity-20 transition text-left">测评流程</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 pt-20 pb-16">
+        <!-- 首页 -->
+        <section id="home-page" class="page min-h-[80vh] flex flex-col justify-center items-center text-center">
+            <div class="bg-pattern absolute inset-0 opacity-20 z-0"></div>
+            <div class="relative z-10 max-w-3xl mx-auto">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold mb-6 text-glow leading-tight">
+                    <span class="text-primary">黑暗三角</span>人格
+                    <span class="text-accent">3.0</span>升级版
+                </h1>
+                <div class="text-xs sm:text-sm md:text-base mb-8 text-gray-300 max-w-3xl mx-auto text-justify leading-relaxed">
+                    <p class="mb-2">
+                        深入探索你内心深处的黑暗人格特质，通过科学的心理学评估体系，从<strong class="text-accent">10个核心维度</strong>全面解析你的心理构成。
+                    </p>
+                    <p class="text-xs text-gray-400">
+                        基于现代人格心理学研究，结合马基雅维利主义、自恋特质、精神变态等黑暗三角理论，为你提供专业、准确的人格分析报告。
+                    </p>
+                </div>
+                
+                <!-- 兑换码验证 -->
+                <div id="code-verification" class="mb-8 bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-accent">兑换码验证</h2>
+                    <p class="text-gray-300 mb-4">请输入您的兑换码以开始测试</p>
+                    <div class="flex flex-col md:flex-row gap-4 justify-center">
+                        <input type="text" id="code-input" class="code-input px-4 py-2 bg-dark border border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent w-full md:w-64" placeholder="输入兑换码">
+                        <button id="verify-code-btn" class="btn-primary px-6 py-2 bg-gradient-purple text-white rounded-lg hover:opacity-90 transition">验证</button>
+                    </div>
+                    <p id="code-error" class="text-red-500 mt-3 hidden">兑换码无效，请重试</p>
+                    <p class="mt-4 text-sm text-gray-400">没有兑换码？<a href="https://www.xiaohongshu.com/user/profile/63888e240000000024009f51?xsec_token=YBE7gVpDYMhmFIi-aaHW_qvA3YDSKABj-xfGMrixgYZtc%3D&xsec_source=app_share&xhsshare=CopyLink&shareRedId=ODk6ODtKNj02NzUyOTgwNjg3OTc9Szs6&apptime=1761970220&share_id=39cb8bcf722d42bc9ac2a8757d7e566c&share_channel=copy_link" target="_blank" class="text-accent hover:underline">点击获取</a></p>
+                </div>
+                
+                <div id="test-info" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-10">
+                    <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg card">
+                        <div class="text-accent text-3xl mb-4">
+                            <i class="fa fa-flask"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">科学依据</h3>
+                        <p class="text-gray-300 text-sm leading-relaxed">基于最新心理学研究，全面评估黑暗三角人格特质</p>
+                    </div>
+                    <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg card">
+                        <div class="text-accent text-3xl mb-4">
+                            <i class="fa fa-bar-chart"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">多维分析</h3>
+                        <p class="text-gray-300 text-sm leading-relaxed">从10个维度深入解析你的黑暗人格特质</p>
+                    </div>
+                    <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg card">
+                        <div class="text-accent text-3xl mb-4">
+                            <i class="fa fa-shield"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">隐私保障</h3>
+                        <p class="text-gray-300 text-sm leading-relaxed">所有测试数据仅用于生成报告，不会被存储或分享</p>
+                    </div>
+                </div>
+                
+                <button id="start-test-btn" class="btn-primary px-8 py-3 bg-gradient-purple text-white text-lg rounded-lg hover:opacity-90 transition hidden">
+                    开始测试
+                </button>
+            </div>
+        </section>
+
+        <!-- 测试页 -->
+        <section id="test-page" class="page hidden min-h-[80vh]">
+            <div class="max-w-3xl mx-auto">
+                <!-- 进度条 -->
+                <div class="mb-8 bg-secondary rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-accent h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between items-center mb-6">
+                    <button id="prev-btn" class="px-4 py-2 bg-secondary text-light rounded-lg hover:bg-primary hover:bg-opacity-20 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa fa-arrow-left mr-2"></i>上一题
+                    </button>
+                    <span id="question-progress" class="text-accent font-medium">第 1 题 / 共 42 题</span>
+                    <button id="next-btn" class="px-4 py-2 bg-gradient-purple text-white rounded-lg hover:opacity-90 transition">
+                        下一题<i class="fa fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                
+                <!-- 题目卡片 -->
+                <div id="question-card" class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-6">
+                    <h2 id="question-category" class="text-sm uppercase tracking-wider text-accent mb-2">马基雅维利主义篇</h2>
+                    <h3 id="question-text" class="text-xl font-semibold mb-6">有人说"历史由胜利者书写"，你是否觉得这意味着只要能赢得最终胜利，过程中的手段和方法都可以被合理化？</h3>
+                    <div id="options-container" class="space-y-3">
+                        <div class="option option-hover p-3 border border-gray-700 rounded-lg cursor-pointer" data-value="1">
+                            <span class="font-medium mr-2">A：</span>
+                            <span>"绝不认同，道德底线不容触碰"</span>
+                        </div>
+                        <div class="option option-hover p-3 border border-gray-700 rounded-lg cursor-pointer" data-value="2">
+                            <span class="font-medium mr-2">B：</span>
+                            <span>"偶尔动摇，但始终坚持原则"</span>
+                        </div>
+                        <div class="option option-hover p-3 border border-gray-700 rounded-lg cursor-pointer" data-value="3">
+                            <span class="font-medium mr-2">C：</span>
+                            <span>"世事无常，唯有顺势而为"</span>
+                        </div>
+                        <div class="option option-hover p-3 border border-gray-700 rounded-lg cursor-pointer" data-value="4">
+                            <span class="font-medium mr-2">D：</span>
+                            <span>"成王败寇，这本就是生存法则"</span>
+                        </div>
+                        <div class="option option-hover p-3 border border-gray-700 rounded-lg cursor-pointer" data-value="5">
+                            <span class="font-medium mr-2">E：</span>
+                            <span>"强者定义规则，弱者只能服从命运"</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 题目导航 -->
+                <div id="question-nav" class="flex flex-wrap gap-2 justify-center">
+                    <!-- 动态生成题目导航点 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 结果页 -->
+        <section id="result-page" class="page hidden min-h-[80vh]">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold mb-8 text-center text-glow">
+                    <span class="text-primary">黑暗三角</span>人格测试结果
+                </h1>
+                
+                <!-- 结果概览 -->
+                <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-accent">测试概览</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center p-4 border border-gray-700 rounded-lg">
+                            <h3 class="text-sm text-gray-400 mb-1">马基雅维利主义</h3>
+                            <p id="machiavellianism-score" class="text-2xl font-bold text-primary">0</p>
+                            <p id="machiavellianism-level" class="text-xs text-gray-400">低</p>
+                        </div>
+                        <div class="text-center p-4 border border-gray-700 rounded-lg">
+                            <h3 class="text-sm text-gray-400 mb-1">心理变态特质</h3>
+                            <p id="psychopathy-score" class="text-2xl font-bold text-primary">0</p>
+                            <p id="psychopathy-level" class="text-xs text-gray-400">低</p>
+                        </div>
+                        <div class="text-center p-4 border border-gray-700 rounded-lg">
+                            <h3 class="text-sm text-gray-400 mb-1">自恋特质</h3>
+                            <p id="narcissism-score" class="text-2xl font-bold text-primary">0</p>
+                            <p id="narcissism-level" class="text-xs text-gray-400">低</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center p-4 border border-gray-700 rounded-lg">
+                        <h3 class="text-sm text-gray-400 mb-1">黑暗三角总分(D)</h3>
+                        <p id="dark-triad-total-score" class="text-2xl font-bold text-primary">0</p>
+                        <p id="dark-triad-total-level" class="text-xs text-gray-400">低</p>
+                    </div>
+                </div>
+                
+                <!-- 雷达图 -->
+                <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-accent">分数分布与人群排名对比</h2>
+                    <div class="radar-container">
+                        <canvas id="combined-radar-chart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 详细分析 -->
+                <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-accent">详细维度分析</h2>
+                    
+                    <!-- 利己主义 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">利己主义</h3>
+                            <div class="flex items-center">
+                                <span id="self-interest-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="self-interest-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="self-interest-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 贪婪 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">贪婪</h3>
+                            <div class="flex items-center">
+                                <span id="greed-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="greed-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="greed-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 马基雅维利主义 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">马基雅维利主义</h3>
+                            <div class="flex items-center">
+                                <span id="detail-machiavellianism-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="detail-machiavellianism-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="detail-machiavellianism-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 道德推脱 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">道德推脱</h3>
+                            <div class="flex items-center">
+                                <span id="moral-disengagement-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="moral-disengagement-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="moral-disengagement-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 自恋 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">自恋</h3>
+                            <div class="flex items-center">
+                                <span id="detail-narcissism-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="detail-narcissism-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="detail-narcissism-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 心理权利 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">心理权利</h3>
+                            <div class="flex items-center">
+                                <span id="psychological-entitlement-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="psychological-entitlement-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="psychological-entitlement-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 精神变态 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">精神变态</h3>
+                            <div class="flex items-center">
+                                <span id="detail-psychopathy-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="detail-psychopathy-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="detail-psychopathy-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 施虐倾向 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">施虐倾向</h3>
+                            <div class="flex items-center">
+                                <span id="sadism-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="sadism-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="sadism-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 自我为中心 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">自我为中心</h3>
+                            <div class="flex items-center">
+                                <span id="self-centered-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="self-centered-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="self-centered-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                    
+                    <!-- 恶毒倾向 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-medium">恶毒倾向</h3>
+                            <div class="flex items-center">
+                                <span id="malevolence-score" class="mr-2">0%</span>
+                                <div class="w-32 bg-gray-700 rounded-full h-2">
+                                    <div id="malevolence-bar" class="bg-accent h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="malevolence-analysis" class="text-sm text-gray-300">
+                            <!-- 分析内容将通过JavaScript动态插入 -->
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 综合分析 -->
+                <div class="bg-secondary bg-opacity-80 p-6 rounded-lg shadow-lg mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-accent">综合分析与建议</h2>
+                    <div id="comprehensive-analysis" class="text-gray-300">
+                        <!-- 综合分析内容将通过JavaScript动态插入 -->
+                    </div>
+                </div>
+                
+                <!-- 重新测试按钮 -->
+                <div class="text-center">
+                    <button id="restart-test-btn" class="btn-primary px-8 py-3 bg-gradient-purple text-white text-lg rounded-lg hover:opacity-90 transition">
+                        重新测试
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-secondary py-4 border-t border-primary border-opacity-30">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-2 md:mb-0">
+                    <p class="text-gray-400 text-sm">© 2025 SCL量子心理研究院 版权所有</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-accent transition">
+                        <i class="fa fa-weibo"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-accent transition">
+                        <i class="fa fa-wechat"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-accent transition">
+                        <i class="fa fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-3 text-center">
+                <p class="text-gray-500 text-xs leading-tight">
+                    免责声明：本测试仅供娱乐和自我探索，不构成专业心理诊断。测试结果仅反映当前状态，不代表未来发展趋势。
+                </p>
+                <p class="text-gray-500 text-xs mt-1 leading-tight">
+                    参考资料：基于黑暗三角人格理论（Paulhus & Williams, 2002），结合最新研究成果编制。
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="science-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-accent">科学依据</h2>
+                <button class="close-modal text-gray-400 hover:text-white">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="text-gray-300">
+                <p class="mb-4">黑暗三角人格测试基于Paulhus和Williams于2002年提出的黑暗三角人格理论，包括马基雅维利主义、心理变态和自恋三个维度。</p>
+                <p class="mb-4">本测试在经典理论基础上，增加了利己主义、贪婪、道德推脱、心理权利、施虐倾向、自我为中心和恶毒倾向等维度，形成更全面的10维度评估体系。</p>
+                <p>测试题目经过严格的心理学量表编制流程，包括项目分析、信效度检验和常模建立，确保测试结果的科学性和可靠性。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-accent">隐私保护</h2>
+                <button class="close-modal text-gray-400 hover:text-white">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="text-gray-300">
+                <p class="mb-2">我们非常重视您的隐私保护，采取以下措施确保您的数据安全：</p>
+                <ul class="list-disc pl-5 mb-2 space-y-1">
+                    <li>所有测试数据仅在您的浏览器本地处理，不会上传至服务器</li>
+                    <li>测试完成后，您可以选择保存或分享结果，但我们不会自动存储任何个人信息</li>
+                    <li>我们不会收集您的IP地址、设备信息或其他可识别个人身份的数据</li>
+                    <li>本网站不使用任何追踪Cookie或分析工具</li>
+                </ul>
+                <p class="mb-0">您的隐私是我们的首要考虑，请放心完成测试。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="process-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-accent">测评流程</h2>
+                <button class="close-modal text-gray-400 hover:text-white">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="text-gray-300">
+                <p class="mb-4">本测试包含42道题目，分为三个部分：</p>
+                <ol class="list-decimal pl-5 mb-4 space-y-2">
+                    <li><span class="font-medium">马基雅维利主义篇（1-14题）</span>：评估您的策略性思维、操纵倾向和结果导向</li>
+                    <li><span class="font-medium">心理变态特质篇（15-28题）</span>：评估您的冲动性、缺乏同理心和反社会倾向</li>
+                    <li><span class="font-medium">自恋特质篇（29-42题）</span>：评估您的自我中心、优越感和寻求关注的倾向</li>
+                </ol>
+                <p class="mb-4">每道题目有5个选项，从"非常不符合"到"非常符合"。请根据您的真实情况选择最适合的选项。</p>
+                <p>完成测试后，系统将自动计算您在10个维度上的得分，并生成详细的分析报告。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 题库数据
+        const questions = [
+            // 马基雅维利主义篇（1-14题）
+            {
+                id: 1,
+                category: "马基雅维利主义篇",
+                text: "有人说'历史由胜利者书写'，你是否觉得这意味着只要能赢得最终胜利，过程中的手段和方法都可以被合理化？",
+                options: [
+                    { value: 1, text: "\"绝不认同，道德底线不容触碰\"" },
+                    { value: 2, text: "\"偶尔动摇，但始终坚持原则\"" },
+                    { value: 3, text: "\"世事无常，唯有顺势而为\"" },
+                    { value: 4, text: "\"成王败寇，这本就是生存法则\"" },
+                    { value: 5, text: "\"强者定义规则，弱者只能服从命运\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    moralDisengagement: 1,
+                    psychologicalEntitlement: 0.5
+                }
+            },
+            {
+                id: 2,
+                category: "马基雅维利主义篇",
+                text: "在这个信息爆炸的时代，你是否认为掌握信息筛选和释放的主导权，就等于掌握了对他人的影响力？",
+                options: [
+                    { value: 1, text: "\"信息应该自由流通，不应被操控\"" },
+                    { value: 2, text: "\"适当引导可以，但不能恶意扭曲\"" },
+                    { value: 3, text: "\"真假虚实本就是生活的常态\"" },
+                    { value: 4, text: "\"信息就是权力，运用得当方能立于不败之地\"" },
+                    { value: 5, text: "\"我就是信息的主宰，众声喧哗中只听我言\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    selfCentered: 0.5,
+                    malevolence: 0.3
+                }
+            },
+            {
+                id: 3,
+                category: "马基雅维利主义篇",
+                text: "当面对重要的职业晋升机会时，你是否会利用同事的弱点或失误来凸显自己的优势？",
+                options: [
+                    { value: 1, text: "\"永远不会，诚信是立身之本\"" },
+                    { value: 2, text: "\"除非对方恶意竞争，否则不用\"" },
+                    { value: 3, text: "\"商场如战场，各显神通无可厚非\"" },
+                    { value: 4, text: "\"优胜劣汰，这正是职场生存之道\"" },
+                    { value: 5, text: "\"天地不仁，我亦不必拘泥于人情的羁绊\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    selfInterest: 0.7,
+                    greed: 0.5
+                }
+            },
+            {
+                id: 4,
+                category: "马基雅维利主义篇",
+                text: "在处理复杂的人际关系时，你是否会根据对方的利用价值和性格特点，采取不同的交往策略？",
+                options: [
+                    { value: 1, text: "\"待人接物，始终如一\"" },
+                    { value: 2, text: "\"大体一致，略有调整\"" },
+                    { value: 3, text: "\"因人而异，灵活应变才是智者所为\"" },
+                    { value: 4, text: "\"每个人都像棋子，在我的棋盘上有其固定位置\"" },
+                    { value: 5, text: "\"世人皆可为我所用，只看如何巧妙安排\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    selfCentered: 0.7,
+                    malevolence: 0.3
+                }
+            },
+            {
+                id: 5,
+                category: "马基雅维利主义篇",
+                text: "有人说'没有永远的朋友，只有永远的利益'，你是否认同这在当今社会尤为适用？",
+                options: [
+                    { value: 1, text: "\"真情胜过利益，这是我坚信的原则\"" },
+                    { value: 2, text: "\"二者兼顾，寻找最佳平衡点\"" },
+                    { value: 3, text: "\"利益是永恒的驱动力\"" },
+                    { value: 4, text: "\"天下熙熙皆为利来，古今中外莫不如此\"" },
+                    { value: 5, text: "\"朋友不过是利益未到尽头时的假面，拆穿是早晚的事\"" }
+                ],
+                dimensions: {
+                    selfInterest: 1,
+                    greed: 0.7,
+                    moralDisengagement: 0.5
+                }
+            },
+            {
+                id: 6,
+                category: "马基雅维利主义篇",
+                text: "在做重大决策时，你是否会将情感因素排除在外，仅从理性和利益角度出发？",
+                options: [
+                    { value: 1, text: "\"感性理性同等重要，缺一不可\"" },
+                    { value: 2, text: "\"理性主导，感性辅助\"" },
+                    { value: 3, text: "\"感性如水，理性似舟，顺水行舟才是大道\"" },
+                    { value: 4, text: "\"情感偶尔干扰，但能快速剥离——它们不值一提\"" },
+                    { value: 5, text: "\"情感是无用的累赘，必须彻底清除才能做出最优解\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 0.7,
+                    psychopathy: 0.5,
+                    selfCentered: 0.3
+                }
+            },
+            {
+                id: 7,
+                category: "马基雅维利主义篇",
+                text: "在团队合作中，你是否会有意识地收集他人的工作疏漏，以备不时之需？",
+                options: [
+                    { value: 1, text: "\"绝对不会，这是违背道德的行为\"" },
+                    { value: 2, text: "\"特殊情况才会考虑\"" },
+                    { value: 3, text: "\"防人之心不可无，这是基本的自我保护\"" },
+                    { value: 4, text: "\"收集疏漏是自保的必要手段，谈不上道德\"" },
+                    { value: 5, text: "\"不仅收集，还会巧妙引导他人犯错以留下把柄——未雨绸缪罢了\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    malevolence: 0.7,
+                    moralDisengagement: 0.5
+                }
+            },
+            {
+                id: 8,
+                category: "马基雅维利主义篇",
+                text: "面对竞争对手，你是否会选择性地暴露对他们不利的信息，即使知道这可能不完全公正？",
+                options: [
+                    { value: 1, text: "\"宁可输掉竞争也要坚守公正\"" },
+                    { value: 2, text: "\"尽可能保持客观，但也难免有所侧重\"" },
+                    { value: 3, text: "\"知己知彼，信息战本就是竞争的一部分\"" },
+                    { value: 4, text: "\"兵不厌诈，商场上从来就没有纯粹的公平竞争\"" },
+                    { value: 5, text: "\"只要能赢，捏造信息也在所不惜——真相本就是胜利者的装饰\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    malevolence: 0.7,
+                    moralDisengagement: 0.7
+                }
+            },
+            {
+                id: 9,
+                category: "马基雅维利主义篇",
+                text: "你是否认为，真正聪明的人应该学会在不同的人面前展现不同的面貌？",
+                options: [
+                    { value: 1, text: "\"做人就要表里如一，何必伪装\"" },
+                    { value: 2, text: "\"适当的修饰是对他人的尊重\"" },
+                    { value: 3, text: "\"根据场合调整，不刻意但有分寸\"" },
+                    { value: 4, text: "\"每个人都有多副面孔，适时切换才是生存智慧\"" },
+                    { value: 5, text: "\"千面人生，无人能识真实的我——这是最高级的保护色\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 0.7,
+                    narcissism: 0.5,
+                    selfCentered: 0.3
+                }
+            },
+            {
+                id: 10,
+                category: "马基雅维利主义篇",
+                text: "在处理危机时，你是否会优先考虑如何保全自己，即使这可能损害他人利益？",
+                options: [
+                    { value: 1, text: "\"舍己为人是我的人生信条\"" },
+                    { value: 2, text: "\"先保护好自己才能更好地帮助他人\"" },
+                    { value: 3, text: "\"危墙之下，各自保重，这也是无可奈何之事\"" },
+                    { value: 4, text: "\"优先自保，必要时可牺牲他人利益——道德在生存面前不值一提\"" },
+                    { value: 5, text: "\"早已布好后路，危机中不仅自保，还能借机渔利——混乱才是机会\"" }
+                ],
+                dimensions: {
+                    selfInterest: 1,
+                    psychopathy: 0.5,
+                    greed: 0.3
+                }
+            },
+            {
+                id: 11,
+                category: "马基雅维利主义篇",
+                text: "在追求个人目标的过程中，你是否会把他人对你的信任当作可以利用的资源？",
+                options: [
+                    { value: 1, text: "\"信任无比珍贵，绝不能辜负\"" },
+                    { value: 2, text: "\"绝大多数情况都不会，除非事关重大\"" },
+                    { value: 3, text: "\"视情况而定，轻重缓急自有分寸\"" },
+                    { value: 4, text: "\"人不为己天诛地灭，这本就是世间常理\"" },
+                    { value: 5, text: "\"信任是最廉价的筹码，不用白不用——背叛从不可惜\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    malevolence: 0.7,
+                    moralDisengagement: 0.7
+                }
+            },
+            {
+                id: 12,
+                category: "马基雅维利主义篇",
+                text: "当面临道德困境时，你是否会用'这都是为了更大的善'来为自己的选择辩护？",
+                options: [
+                    { value: 1, text: "\"无论何时都不能用目的为手段开脱\"" },
+                    { value: 2, text: "\"偶尔需要这样的心理安慰\"" },
+                    { value: 3, text: "\"常用这种方式来缓解内心的道德焦虑\"" },
+                    { value: 4, text: "\"物竞天择，能够合理利用资源正是智者的体现\"" },
+                    { value: 5, text: "\"所谓的道德困境，不过是弱者的借口——我的选择就是最大的善\"" }
+                ],
+                dimensions: {
+                    moralDisengagement: 1,
+                    machiavellianism: 0.7,
+                    psychologicalEntitlement: 0.5
+                }
+            },
+            {
+                id: 13,
+                category: "马基雅维利主义篇",
+                text: "你是否认为，过于正直的人在当今社会往往会吃亏，因此需要学会变通？",
+                options: [
+                    { value: 1, text: "\"宁愿吃亏也要保持正直\"" },
+                    { value: 2, text: "\"在原则范围内可以适当调整\"" },
+                    { value: 3, text: "\"随机应变，不拘一格\"" },
+                    { value: 4, text: "\"正直是奢侈品，普通人不配拥有——变通才是生存本能\"" },
+                    { value: 5, text: "\"所谓正直，不过是没能力作恶的遮羞布\"" }
+                ],
+                dimensions: {
+                    moralDisengagement: 1,
+                    selfInterest: 0.7,
+                    malevolence: 0.5
+                }
+            },
+            {
+                id: 14,
+                category: "马基雅维利主义篇",
+                text: "在职场上，你是否会刻意营造某些特定的形象或口碑，以此来获得更多的影响力？",
+                options: [
+                    { value: 1, text: "\"我就是我，不需刻意经营\"" },
+                    { value: 2, text: "\"自然的魅力就是最好的名片\"" },
+                    { value: 3, text: "\"适当的形象管理是现代职场的必修课\"" },
+                    { value: 4, text: "\"精心设计的形象就是武器，能精准击中他人的信任点\"" },
+                    { value: 5, text: "\"形象是我的伪装，真实的目的藏在每一个表情背后\"" }
+                ],
+                dimensions: {
+                    machiavellianism: 1,
+                    narcissism: 0.7,
+                    selfCentered: 0.5
+                }
+            },
+            
+            // 心理变态特质篇（15-28题）
+            {
+                id: 15,
+                category: "心理变态特质篇",
+                text: "当生活陷入一成不变的重复时，你是否会产生一种难以忍受的焦躁感，迫切想要打破现状？",
+                options: [
+                    { value: 1, text: "\"平淡是真，岁月静好才是最珍贵的\"" },
+                    { value: 2, text: "\"偶尔需要一点小小的刺激来调剂生活\"" },
+                    { value: 3, text: "\"平淡是福，但偶尔也需要一点惊喜\"" },
+                    { value: 4, text: "\"我要让每一天都充满未知的可能性\"" },
+                    { value: 5, text: "\"平淡是慢性死亡，必须制造混乱才能感到活着——哪怕伤害他人\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    sadism: 0.5,
+                    malevolence: 0.3
+                }
+            },
+            {
+                id: 16,
+                category: "心理变态特质篇",
+                text: "在进行高风险活动时，那种心跳加速、手心出汗的感觉，对你来说是恐惧的信号还是兴奋的前奏？",
+                options: [
+                    { value: 1, text: "\"危险的警报，及时止步才是明智之举\"" },
+                    { value: 2, text: "\"令人紧张的挑战，既有畏惧也有期待\"" },
+                    { value: 3, text: "\"这就是活着的证据，让我真切地感受到生命的存在\"" },
+                    { value: 4, text: "\"恐惧？那是弱者的专利，我只感到征服危险的快感\"" },
+                    { value: 5, text: "\"越危险越兴奋，甚至会主动升级风险以追求极致体验\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    sadism: 0.7,
+                    malevolence: 0.5
+                }
+            },
+            {
+                id: 17,
+                category: "心理变态特质篇",
+                text: "当看到他人遭遇不幸时，你的第一反应是同情还是冷静分析其原因？",
+                options: [
+                    { value: 1, text: "\"感同身受，希望能给予帮助\"" },
+                    { value: 2, text: "\"理解但不一定会介入\"" },
+                    { value: 3, text: "\"旁观者清，正好借此观察人世百态\"" },
+                    { value: 4, text: "\"不幸？不过是世界筛选弱者的方式——与我无关\"" },
+                    { value: 5, text: "\"甚至觉得有趣，想看看他们还能有多狼狈\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    sadism: 0.7,
+                    malevolence: 0.7
+                }
+            },
+            {
+                id: 18,
+                category: "心理变态特质篇",
+                text: "当愤怒的情绪涌上心头时，你是否能够轻易控制住自己想要发泄的冲动？",
+                options: [
+                    { value: 1, text: "\"情绪稳定，很少出现失控的情况\"" },
+                    { value: 2, text: "\"大多数时候可以，但也会有控制不住的时候\"" },
+                    { value: 3, text: "\"情绪的波涛汹涌正是生命活力的体现\"" },
+                    { value: 4, text: "\"冲动是本能，发泄出来才痛快——后果？事后再说\"" },
+                    { value: 5, text: "\"愤怒时会故意放大冲动，看他人恐惧的样子很有趣\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    sadism: 0.5,
+                    malevolence: 0.5
+                }
+            },
+            {
+                id: 19,
+                category: "心理变态特质篇",
+                text: "当面对诱惑时，你是否能够清晰地预见可能的后果并加以克制？",
+                options: [
+                    { value: 1, text: "\"三思而行是我的处事原则\"" },
+                    { value: 2, text: "\"理性常在，但也有被感性淹没之时\"" },
+                    { value: 3, text: "\"情绪如洪水猛兽，一旦释放就很难收回\"" },
+                    { value: 4, text: "\"预见后果又如何？诱惑本身就值得冒险\"" },
+                    { value: 5, text: "\"后果是给胆小鬼的枷锁，我从不被束缚\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    selfInterest: 0.7,
+                    greed: 0.5
+                }
+            },
+            {
+                id: 20,
+                category: "心理变态特质篇",
+                text: "在人际关系中，你是否经常感到厌倦，想要切断联系去寻找新的刺激？",
+                options: [
+                    { value: 1, text: "\"珍视每一份来之不易的情谊\"" },
+                    { value: 2, text: "\"日久情深，细水长流的感情最动人\"" },
+                    { value: 3, text: "\"新鲜感一过就索然无味，断联像丢弃旧物一样自然\"" },
+                    { value: 4, text: "\"故意制造冲突来结束关系，看对方痛苦很刺激\"" },
+                    { value: 5, text: "\"人际关系本就是游戏，玩腻了就换个新局\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    narcissism: 0.5,
+                    sadism: 0.5
+                }
+            },
+            {
+                id: 21,
+                category: "心理变态特质篇",
+                text: "在做重要决定时，你是否会更倾向于跟随当下的直觉，而不是反复权衡利弊？",
+                options: [
+                    { value: 1, text: "\"慎重行事，充分论证后才做决定\"" },
+                    { value: 2, text: "\"大致判断后就行动，过多的思考反而是束缚\"" },
+                    { value: 3, text: "\"直觉就是最优解，思考只会干扰本能——错了也不悔\"" },
+                    { value: 4, text: "\"故意反直觉行事，看结果如何颠覆预期\"" },
+                    { value: 5, text: "\"决定不需要理由，想做就做是最高准则\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    selfCentered: 0.7,
+                    malevolence: 0.3
+                }
+            },
+            {
+                id: 22,
+                category: "心理变态特质篇",
+                text: "当回忆起过去伤害他人的行为时，你是否仍然会感到深深的自责和懊悔？",
+                options: [
+                    { value: 1, text: "\"往事不堪回首，至今仍在忏悔\"" },
+                    { value: 2, text: "\"虽有遗憾，但明白这些都是成长的必经之路\"" },
+                    { value: 3, text: "\"往事如烟，就让它们随风而去吧\"" },
+                    { value: 4, text: "\"过去的就让它过去，重要的是把握当下\"" },
+                    { value: 5, text: "\"从不自责，他们活该被伤害——是他们自己蠢\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    moralDisengagement: 0.7,
+                    sadism: 0.7
+                }
+            },
+            {
+                id: 23,
+                category: "心理变态特质篇",
+                text: "在遵守规则和法律时，你是否会下意识地去寻找其中的漏洞和可以利用的空间？",
+                options: [
+                    { value: 1, text: "\"遵纪守法是公民的基本责任\"" },
+                    { value: 2, text: "\"在不违法的情况下可以灵活处理\"" },
+                    { value: 3, text: "\"规则是人定的，自然也允许人来修改和完善\"" },
+                    { value: 4, text: "\"规则漏洞是留给聪明人的通道，不用是傻瓜\"" },
+                    { value: 5, text: "\"不仅找漏洞，还会设计陷阱让他人踩——规则对我无效\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    machiavellianism: 0.7,
+                    moralDisengagement: 0.7
+                }
+            },
+            {
+                id: 24,
+                category: "心理变态特质篇",
+                text: "当看到弱小者被欺凌时，你是否会毫不犹豫地挺身而出？",
+                options: [
+                    { value: 1, text: "\"路见不平拔刀相助是我的一贯作风\"" },
+                    { value: 2, text: "\"事不关己，何必惹麻烦——弱小自有其命运\"" },
+                    { value: 3, text: "\"会观望，看是否有渔利的机会——没好处就不动\"" },
+                    { value: 4, text: "\"甚至觉得欺凌者做得对，弱小就该被淘汰\"" },
+                    { value: 5, text: "\"会假装帮忙，实则火上浇油——混乱中才好浑水摸鱼\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    sadism: 0.7,
+                    malevolence: 0.7
+                }
+            },
+            {
+                id: 25,
+                category: "心理变态特质篇",
+                text: "在日常交往中，你是否会刻意隐藏自己的真实想法和情感？",
+                options: [
+                    { value: 1, text: "\"真诚待人才是正确的相处之道\"" },
+                    { value: 2, text: "\"适当的保留是对双方的保护\"" },
+                    { value: 3, text: "\"逢人只说三分话，这是老祖宗传下来的处世智慧\"" },
+                    { value: 4, text: "\"真实想法是致命弱点，必须永远埋葬——没人配知道\"" },
+                    { value: 5, text: "\"故意说反话误导他人，看他们猜不透的样子很有趣\"" }
+                ],
+                dimensions: {
+                    psychopathy: 0.7,
+                    machiavellianism: 0.7,
+                    malevolence: 0.5
+                }
+            },
+            {
+                id: 26,
+                category: "心理变态特质篇",
+                text: "当面临突发状况时，你的第一反应是慌乱还是迅速进入解决问题的状态？",
+                options: [
+                    { value: 1, text: "\"泰山崩于前而色不变，麋鹿兴于左而目不瞬\"" },
+                    { value: 2, text: "\"有点慌乱，但很快能掩饰过去——不能让人看出破绽\"" },
+                    { value: 3, text: "\"慌乱是正常的，但更想看看事态会恶化到什么程度\"" },
+                    { value: 4, text: "\"完全不慌，甚至有点兴奋——终于有事情打破无聊了\"" },
+                    { value: 5, text: "\"会故意拖延解决，享受他人焦急的样子\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    selfCentered: 0.5,
+                    sadism: 0.5
+                }
+            },
+            {
+                id: 27,
+                category: "心理变态特质篇",
+                text: "在追求个人享乐时，你是否会将他人的感受和可能造成的后果放在次要位置？",
+                options: [
+                    { value: 1, text: "\"时时为他人着想，这是我的本性\"" },
+                    { value: 2, text: "\"尽量顾及他人，但如果冲突也只能优先考虑自己\"" },
+                    { value: 3, text: "\"他人感受？从不在考虑范围内——我的快乐最重要\"" },
+                    { value: 4, text: "\"故意忽略他人感受，看他们忍耐的样子很有趣\"" },
+                    { value: 5, text: "\"享乐就是要建立在他人不便之上，这样才够味\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    selfInterest: 0.7,
+                    sadism: 0.7
+                }
+            },
+            {
+                id: 28,
+                category: "心理变态特质篇",
+                text: "在漫长的人生旅途中，你是否曾经认真思考过生命的意义和价值所在？",
+                options: [
+                    { value: 1, text: "\"常常在夜深人静时思索这些问题\"" },
+                    { value: 2, text: "\"偶尔想到，但很快就会转移注意力\"" },
+                    { value: 3, text: "\"人生得意须尽欢，这才是不辜负生命的态度\"" },
+                    { value: 4, text: "\"生命本无意义，纠结这个太可笑——及时行乐都嫌麻烦\"" },
+                    { value: 5, text: "\"生命的意义就是折腾他人，看世界混乱才有趣\"" }
+                ],
+                dimensions: {
+                    psychopathy: 1,
+                    malevolence: 0.7,
+                    selfCentered: 0.5
+                }
+            },
+            
+            // 自恋特质篇（29-42题）
+            {
+                id: 29,
+                category: "自恋特质篇",
+                text: "当走在街上时，你是否会不自觉地在心中暗想：'这些人中有多少人注意到了我的与众不同？'",
+                options: [
+                    { value: 1, text: "\"从未有过这种想法，大家都是一样的普通人\"" },
+                    { value: 2, text: "\"偶尔会希望得到他人的认可和关注\"" },
+                    { value: 3, text: "\"大部分人应该都能看到我的特别——毕竟我和他们不一样\"" },
+                    { value: 4, text: "\"我希望成为人群中最耀眼的那个人，就像黑夜中的萤火虫一样鲜明出众\"" },
+                    { value: 5, text: "\"他们没注意到是因为眼界太低，不配欣赏我的出众\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.7,
+                    psychologicalEntitlement: 0.5
+                }
+            },
+            {
+                id: 30,
+                category: "自恋特质篇",
+                text: "在浏览社交媒体时，你是否会格外留意那些与你相关的评论和反馈？",
+                options: [
+                    { value: 1, text: "\"随意看看，不太在意具体的评价\"" },
+                    { value: 2, text: "\"会比较关注，因为这些反映了他人对我的看法\"" },
+                    { value: 3, text: "\"每条评论都要仔细分析，差评必须怼回去——不能容忍诋毁\"" },
+                    { value: 4, text: "\"没有足够的赞美就是失败，会立刻删除冷清的内容\"" },
+                    { value: 5, text: "\"我的动态就该是焦点，没反馈说明他们没眼光\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.7,
+                    psychologicalEntitlement: 0.7
+                }
+            },
+            {
+                id: 31,
+                category: "自恋特质篇",
+                text: "当面对镜子时，你是否会对自己的容貌感到满意甚至迷恋？",
+                options: [
+                    { value: 1, text: "\"相貌平平，没有什么特别的\"" },
+                    { value: 2, text: "\"还算不错，至少不难看\"" },
+                    { value: 3, text: "\"镜子里的我比实际更迷人——可惜他人看不到全貌\"" },
+                    { value: 4, text: "\"天生丽质难自弃，这就是老天爷给我的恩赐\"" },
+                    { value: 5, text: "\"容貌只是我的冰山一角，我的魅力远不止于此\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.5,
+                    psychologicalEntitlement: 0.3
+                }
+            },
+            {
+                id: 32,
+                category: "自恋特质篇",
+                text: "当收到他人的赞美时，你的内心反应是谦虚否认还是坦然接受这份认可？",
+                options: [
+                    { value: 1, text: "\"愧不敢当，我还有很多的不足之处\"" },
+                    { value: 2, text: "\"谢谢夸奖，我会继续保持的\"" },
+                    { value: 3, text: "\"你们终于发现了我的闪光点\"" },
+                    { value: 4, text: "\"他们说的还不够——我值得更多、更极致的赞美\"" },
+                    { value: 5, text: "\"赞美是应得的，甚至觉得他们的词汇太贫乏\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    psychologicalEntitlement: 0.7,
+                    selfCentered: 0.5
+                }
+            },
+            {
+                id: 33,
+                category: "自恋特质篇",
+                text: "在选择伴侣时，你是否会不自觉地将其与自己心中的完美形象进行比较？",
+                options: [
+                    { value: 1, text: "\"真爱无敌，缺点也都是可爱的印记\"" },
+                    { value: 2, text: "\"人无完人，只要是真心相爱就能够包容和理解\"" },
+                    { value: 3, text: "\"完美形象就是以我为标准，伴侣必须向我看齐\"" },
+                    { value: 4, text: "\"达不到我的标准就是不合格，换掉是理所当然\"" },
+                    { value: 5, text: "\"他们应该庆幸能和我在一起，还敢谈完美？\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.7,
+                    psychologicalEntitlement: 0.7
+                }
+            },
+            {
+                id: 34,
+                category: "自恋特质篇",
+                text: "在工作中获得成就时，你是否会觉得这是因为自己天赋异禀，而非单纯的努力或幸运？",
+                options: [
+                    { value: 1, text: "\"成功来自于不懈的努力和坚持\"" },
+                    { value: 2, text: "\"天赋和努力缺一不可\"" },
+                    { value: 3, text: "\"努力？那是普通人的借口——我的天赋不需要努力加持\"" },
+                    { value: 4, text: "\"幸运？命运都偏爱我这样的人，谈何幸运\"" },
+                    { value: 5, text: "\"像我这样的天才，取得成功难道不是很正常的吗？\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    psychologicalEntitlement: 0.7,
+                    selfCentered: 0.5
+                }
+            },
+            {
+                id: 35,
+                category: "自恋特质篇",
+                text: "在群体讨论中，如果你的观点没有被采纳，你是否会认为这是因为其他人嫉妒你的才华？",
+                options: [
+                    { value: 1, text: "\"可能是自己的想法还不够成熟\"" },
+                    { value: 2, text: "\"或许是时机不对或是其他的原因\"" },
+                    { value: 3, text: "\"他们根本不懂我的深意——一群平庸之辈\"" },
+                    { value: 4, text: "\"不采纳是他们的损失，迟早会后悔没听我的\"" },
+                    { value: 5, text: "\"肯定是他们心存妒忌，不愿意承认我的优秀\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.7,
+                    malevolence: 0.5
+                }
+            },
+            {
+                id: 36,
+                category: "自恋特质篇",
+                text: "当看到媒体报道成功人士的故事时，你是否会心想：'如果我也有那样的机会，一定能比他做得更好'？",
+                options: [
+                    { value: 1, text: "\"各有各的长处，没有必要互相攀比\"" },
+                    { value: 2, text: "\"或许吧，但这种假设本身也没有什么实际意义\"" },
+                    { value: 3, text: "\"给我机会？我能创造比他更好的机会——他的成功不值一提\"" },
+                    { value: 4, text: "\"他的成就放在我身上，只能算起点\"" },
+                    { value: 5, text: "\"这是显而易见的，只是缺少合适的机会罢了\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    psychologicalEntitlement: 0.7,
+                    selfInterest: 0.5
+                }
+            },
+            {
+                id: 37,
+                category: "自恋特质篇",
+                text: "在购买衣物和饰品时，你是否会更加注重它们是否能彰显你的独特品味和个人魅力？",
+                options: [
+                    { value: 1, text: "\"穿着舒服得体就行，不必过分讲究\"" },
+                    { value: 2, text: "\"适当的搭配可以提升个人气质\"" },
+                    { value: 3, text: "\"我的品味就是时尚标杆，他们都在模仿我\"" },
+                    { value: 4, text: "\"价格和品牌不重要，重要的是穿在我身上才发光\"" },
+                    { value: 5, text: "\"时尚就是要彰显个性，我就是要做最特别的那个\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.5,
+                    greed: 0.3
+                }
+            },
+            {
+                id: 38,
+                category: "自恋特质篇",
+                text: "当面对批评和建议时，你的第一反应是为自己辩解还是虚心听取他人的意见？",
+                options: [
+                    { value: 1, text: "\"忠言逆耳利于行，我很乐意接受改进的建议\"" },
+                    { value: 2, text: "\"批评我的人都是出于嫉妒，懒得理他们\"" },
+                    { value: 3, text: "\"会立刻反驳，用我的才华证明他们错得离谱\"" },
+                    { value: 4, text: "\"批评是对我的侮辱，必须让他们道歉——否则没完\"" },
+                    { value: 5, text: "\"所谓批评，不过是他们达不到我的高度的酸话\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    psychologicalEntitlement: 0.7,
+                    malevolence: 0.5
+                }
+            },
+            {
+                id: 39,
+                category: "自恋特质篇",
+                text: "在与他人交谈时，你是否会发现自己的注意力很容易转移到思考接下来要说的话上，而不是专心倾听？",
+                options: [
+                    { value: 1, text: "\"倾听是一门艺术，我一直都在努力学习\"" },
+                    { value: 2, text: "\"希望能够兼顾表达和聆听\"" },
+                    { value: 3, text: "\"倾听？他们的话太无趣，不如我说的有价值\"" },
+                    { value: 4, text: "\"故意打断他们，我的想法比他们的重要得多\"" },
+                    { value: 5, text: "\"我更专注于如何更好地展现自己的想法和见解\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.7,
+                    psychologicalEntitlement: 0.5
+                }
+            },
+            {
+                id: 40,
+                category: "自恋特质篇",
+                text: "在规划未来时，你是否会不自觉地设想自己将成为万众瞩目的焦点人物？",
+                options: [
+                    { value: 1, text: "\"平凡是最好的归宿\"" },
+                    { value: 2, text: "\"偶尔也会做一些不切实际的梦想\"" },
+                    { value: 3, text: "\"成为焦点是必然的，我早已为此做好准备\"" },
+                    { value: 4, text: "\"所有人都该仰望我，这是他们的荣幸\"" },
+                    { value: 5, text: "\"这难道不是我命中注定的结局吗？\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    psychologicalEntitlement: 0.7,
+                    selfCentered: 0.7
+                }
+            },
+            {
+                id: 41,
+                category: "自恋特质篇",
+                text: "当看到他人取得成功时，你是否会下意识地想：'如果他换成是我，能做到这么好么？'",
+                options: [
+                    { value: 1, text: "\"每个人都有自己的特长和优势\"" },
+                    { value: 2, text: "\"也许在某些方面我也同样出色\"" },
+                    { value: 3, text: "\"他的成功充满侥幸，换我来会更辉煌、更持久\"" },
+                    { value: 4, text: "\"我不需要和他比——他还没资格成为我的参照物\"" },
+                    { value: 5, text: "\"毫无疑问，我一定会比他做得更好的\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    selfCentered: 0.7,
+                    psychologicalEntitlement: 0.5
+                }
+            },
+            {
+                id: 42,
+                category: "自恋特质篇",
+                text: "在内心深处，你是否始终相信自己是与众不同的，迟早有一天会让所有人都刮目相看？",
+                options: [
+                    { value: 1, text: "\"大家都是普通人，没必要非要显得多么特别\"" },
+                    { value: 2, text: "\"希望在某个领域能够有所建树，获得认可\"" },
+                    { value: 3, text: "\"他们现在看不起我，将来只会匍匐在我脚下\"" },
+                    { value: 4, text: "\"我的特别不需要证明，时间会让所有人闭嘴\"" },
+                    { value: 5, text: "\"我本就是天之骄子，只是时机尚未成熟而已\"" }
+                ],
+                dimensions: {
+                    narcissism: 1,
+                    psychologicalEntitlement: 0.7,
+                    selfCentered: 0.7
+                }
+            }
+        ];
+
+        // 分析文本（基于0-100%分数范围）
+        const analysisTexts = {
+            selfInterest: {
+                low: "你的利己主义倾向处于低水平（0-33%），表明你对个人利益关注较少，更注重集体和他人的需求。你愿意为了更大的利益牺牲个人利益，这种品质在团队合作和人际关系中非常宝贵。",
+                medium: "你的利己主义倾向处于中等水平（34-66%），能够在个人和集体利益之间找到平衡。在大多数情况下，你会考虑他人的感受，但在必要时也会为自己争取合理的利益。",
+                high: "你的利己主义倾向处于高水平（67-100%），表现出对个人利益的强烈关注，倾向于优先考虑自己的需求和目标。这种特质可以帮助你在竞争环境中取得成功，但也可能影响你的人际关系和团队合作。"
+            },
+            greed: {
+                low: "你的贪婪水平较低（0-33%），对物质财富和权力没有强烈渴望，更注重精神层面的满足。你容易感到满足，不会过度追求不属于自己的东西。",
+                medium: "你的贪婪水平处于中等（34-66%），对物质和权力有一定追求，但能够将其控制在合理范围内。你理解努力工作的价值，也知道如何适度享受生活。",
+                high: "你的贪婪水平较高（67-100%），对物质财富和权力有着强烈渴望，总是想要更多。这种强烈欲望可以成为进步的动力，但也可能让你忽视生活中其他重要领域。"
+            },
+            machiavellianism: {
+                low: "你的马基雅维利主义处于低水平（0-33%），你是一个非常诚实正直的人，不屑于使用操控或欺骗来达到目的。你认为真诚和公平是处理人际关系的最佳方式，在工作和生活中倾向于直接表达自己的想法，不会刻意隐藏真实意图或耍手段。",
+                medium: "你的马基雅维利主义处于中等水平（34-66%），能够在策略性思维和道德原则之间找到平衡。在某些情况下，你会运用策略性思维来实现目标，但不会跨越道德界限，能够根据不同情况调整自己的行为，在需要时展现外交技巧。",
+                high: "你的马基雅维利主义处于高水平（67-100%），非常善于策略性思维和操控他人，愿意为了达到目的不择手段。你能够敏锐地观察他人的弱点并巧妙加以利用，在处理复杂情况时常常能够制定精妙的策略，善于隐藏自己的真实意图。"
+            },
+            moralDisengagement: {
+                low: "你的道德推脱处于低水平（0-33%），具有非常强烈的道德感和责任感，严格坚持自己的道德原则。即使在困难的情况下，你也不会轻易妥协自己的道德准则。",
+                medium: "你的道德推脱处于中等水平（34-66%），具有基本的道德标准，但在某些情况下会灵活处理。你能够理解不同情况的道德复杂性，并做出相应判断。",
+                high: "你的道德推脱处于高水平（67-100%），经常为自己的不道德行为找借口，容易为自己的行为辩护。你认为道德规则是相对的，可以根据具体情况灵活解释。"
+            },
+            narcissism: {
+                low: "你的自恋处于低水平（0-33%），你是一个非常谦逊低调的人，不太关注自己的成就和优点。你倾向于看到他人的价值和贡献，而不是强调自己的重要性，通常对自己的能力有清晰认知。",
+                medium: "你的自恋处于中等水平（34-66%），对自己有合理的信心，能够认识到自己的优点和缺点。你在需要时能够恰当地表达自己，但不会炫耀或傲慢，能够在自我肯定和谦逊之间找到合适平衡。",
+                high: "你的自恋处于高水平（67-100%），非常自信，甚至有些傲慢，总是想成为关注的焦点。你相信自己比别人优越，应该得到特殊待遇和认可，渴望成为所有人注意的中心，享受被赞美和崇拜的感觉。"
+            },
+            psychologicalEntitlement: {
+                low: "你的心理权利处于低水平（0-33%），不认为自己应该得到特殊待遇，相信每个人都应该平等地工作和贡献。你不会轻易要求他人为你提供便利或特殊照顾。",
+                medium: "你的心理权利处于中等水平（34-66%），认为在某些情况下自己应该得到合理的特殊待遇，特别是当你做出额外努力或具有特殊能力时。",
+                high: "你的心理权利处于高水平（67-100%），强烈相信自己无论实际表现如何都应该得到特殊待遇和尊重。你经常要求他人为你提供便利，而不考虑他人的感受。"
+            },
+            psychopathy: {
+                low: "你的精神变态处于低水平（0-33%），你非常在意他人的感受和福祉，总是尽量避免伤害他人。你具有强烈的同理心和责任感，是一个非常善良体贴的人，能够深刻感受到他人的情绪和痛苦。",
+                medium: "你的精神变态处于中等水平（34-66%），在大多数情况下能够控制自己的冲动和行为，但在某些情况下也可能表现出冷漠或冲动的一面。你能够理解他人的感受，但有时也会优先考虑自己的需求，能够在理性和感性之间找到平衡。",
+                high: "你的精神变态处于高水平（67-100%），经常表现出冷漠、冲动和不负责任的行为，不太在意他人的感受和福祉。你可以轻易伤害他人而不感到内疚，经常违反社会规则和道德标准，倾向于追求即时满足和刺激。"
+            },
+            sadism: {
+                low: "你的施虐倾向处于低水平（0-33%），非常善良有同情心，看到他人受苦会感到难过。你总是尽力帮助他人，避免伤害任何有生命的东西。",
+                medium: "你的施虐倾向处于中等水平（34-66%），在大多数情况下能够同情他人的痛苦，但在某些情况下也可能感到一丝幸灾乐祸。你不会主动伤害他人，但也可能不会主动帮助那些处于困境中的人。",
+                high: "你的施虐倾向处于高水平（67-100%），喜欢看他人受苦，甚至主动制造痛苦来满足自己的快感。你对他人的痛苦缺乏同情心，并从中获得快乐。"
+            },
+            selfCentered: {
+                low: "你的自我为中心处于低水平（0-33%），非常关心他人的需求和感受，总是优先考虑他人的利益。你是一个非常无私和体贴的人，愿意为他人付出很多。",
+                medium: "你的自我为中心处于中等水平（34-66%），能够在关注自己和他人之间找到平衡。你考虑他人的感受，但也不会忽视自己的需求和利益。",
+                high: "你的自我为中心处于高水平（67-100%），总是优先考虑自己的需求和感受，很少关心他人的想法。你认为自己的需求比别人更重要，常常将自己的意志强加于他人。"
+            },
+            malevolence: {
+                low: "你的恶毒倾向处于低水平（0-33%），你是一个非常善良友好的人，总是尽力帮助他人，避免与他人发生冲突。你相信人性的善良，愿意相信他人的善意。",
+                medium: "你的恶毒倾向处于中等水平（34-66%），在大多数情况下善良友好，但在受到伤害或挑衅时也可能表现出一些恶意。你能够控制自己的负面情绪，但也不会轻易忘记他人的过错。",
+                high: "你的恶毒倾向处于高水平（67-100%），经常表现出恶意和敌意，喜欢看他人失败和受苦。你可能会主动伤害他人，或在他人遇到困难时感到幸灾乐祸。"
+            }
+        };
+
+        // 综合分析文本（基于0-100%分数范围）
+        const comprehensiveAnalyses = {
+            low: "你的整体黑暗三角人格特质处于低水平（0-33%），表明你是一个非常善良、正直且有同理心的人。你重视道德原则，关心他人感受，不会为了个人利益伤害他人。这种特质使你在人际关系中很受欢迎，能够建立深厚且值得信赖的关系。不过，你也需要注意不要过于轻信他人，要适当保护自己的利益。",
+            medium: "你的整体黑暗三角人格特质处于中等水平（34-66%），表明你在善良和自我保护之间找到了一定的平衡。你具有基本的道德原则，但在某些情况下也会为自己的利益奋斗。你能够理解人性的复杂性，不会过度理想化或贬低他人。这种平衡的特质使你能够在大多数情况下适应不同环境和人际关系。",
+            high: "你的整体黑暗三角人格特质处于高水平（67-100%），表明你是一个非常自信、善于策略性思维且注重自我保护的人。你能够敏锐地观察他人和环境，以最大化自己的利益。这种特质可能会在竞争环境中为你带来一定成功，但也可能影响你的人际关系和长期发展。建议你适当关注他人感受，建立更深层的信任关系。"
+        };
+
+        // 有效兑换码列表
+        const validCodes = ["3VvPOktO6", "561rk9iD1", "8YrnBlFOn", "8Yx8M63Nc", "B7KRQYAz5", "Bl1dy3CFT", "F2X8RbQPw", "InN8e48Gm", "exRpg9pp5", "mulpU42MH"];
+
+        // 全局变量
+        let currentQuestionIndex = 0;
+        const userAnswers = new Array(questions.length).fill(null);
+        let userScores = {
+            selfInterest: 0,
+            greed: 0,
+            machiavellianism: 0,
+            moralDisengagement: 0,
+            narcissism: 0,
+            psychologicalEntitlement: 0,
+            psychopathy: 0,
+            sadism: 0,
+            selfCentered: 0,
+            malevolence: 0,
+            darkTriadTotal: 0
+        };
+        let rankScores = {
+            selfInterest: 0,
+            greed: 0,
+            machiavellianism: 0,
+            moralDisengagement: 0,
+            narcissism: 0,
+            psychologicalEntitlement: 0,
+            psychopathy: 0,
+            sadism: 0,
+            selfCentered: 0,
+            malevolence: 0,
+            darkTriadTotal: 0
+        };
+        let combinedRadarChart = null;
+
+        // DOM 元素
+        const homePage = document.getElementById('home-page');
+        const testPage = document.getElementById('test-page');
+        const resultPage = document.getElementById('result-page');
+        const startTestBtn = document.getElementById('start-test-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const questionProgress = document.getElementById('question-progress');
+        const questionCategory = document.getElementById('question-category');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+        const questionNav = document.getElementById('question-nav');
+        const restartTestBtn = document.getElementById('restart-test-btn');
+        const codeInput = document.getElementById('code-input');
+        const verifyCodeBtn = document.getElementById('verify-code-btn');
+        const codeError = document.getElementById('code-error');
+        const codeVerification = document.getElementById('code-verification');
+        
+        // 模态框元素
+        const scienceModal = document.getElementById('science-modal');
+        const privacyModal = document.getElementById('privacy-modal');
+        const processModal = document.getElementById('process-modal');
+        const btnScience = document.getElementById('btn-science');
+        const btnPrivacy = document.getElementById('btn-privacy');
+        const btnProcess = document.getElementById('btn-process');
+        const mobileBtnScience = document.getElementById('mobile-btn-science');
+        const mobileBtnPrivacy = document.getElementById('mobile-btn-privacy');
+        const mobileBtnProcess = document.getElementById('mobile-btn-process');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+
+        // 初始化函数
+        function init() {
+            // 生成题目导航点
+            generateQuestionNav();
+            
+            // 绑定事件
+            bindEvents();
+            
+            // 初始化雷达图（隐藏状态）
+            initRadarCharts();
+        }
+
+        // 生成题目导航点
+        function generateQuestionNav() {
+            questionNav.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const navItem = document.createElement('div');
+                navItem.className = 'w-3 h-3 rounded-full bg-gray-700 cursor-pointer transition';
+                navItem.dataset.index = i;
+                navItem.addEventListener('click', () => goToQuestion(i));
+                questionNav.appendChild(navItem);
+            }
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 开始测试按钮
+            startTestBtn.addEventListener('click', showTestPage);
+            
+            // 上一题/下一题按钮
+            prevBtn.addEventListener('click', goToPrevQuestion);
+            nextBtn.addEventListener('click', goToNextQuestion);
+            
+            // 重新测试按钮
+            restartTestBtn.addEventListener('click', restartTest);
+            
+            // 兑换码验证按钮
+            verifyCodeBtn.addEventListener('click', verifyCode);
+            
+            // 模态框按钮
+            btnScience.addEventListener('click', () => showModal(scienceModal));
+            btnPrivacy.addEventListener('click', () => showModal(privacyModal));
+            btnProcess.addEventListener('click', () => showModal(processModal));
+            mobileBtnScience.addEventListener('click', () => {
+                showModal(scienceModal);
+                toggleMobileMenu();
+            });
+            mobileBtnPrivacy.addEventListener('click', () => {
+                showModal(privacyModal);
+                toggleMobileMenu();
+            });
+            mobileBtnProcess.addEventListener('click', () => {
+                showModal(processModal);
+                toggleMobileMenu();
+            });
+            
+            // 移动端菜单
+            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+            
+            // 关闭模态框按钮
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    hideAllModals();
+                });
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    hideAllModals();
+                }
+            });
+        }
+
+        // 显示首页
+        function showHomePage() {
+            homePage.classList.remove('hidden');
+            testPage.classList.add('hidden');
+            resultPage.classList.add('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // 显示测试页
+        function showTestPage() {
+            homePage.classList.add('hidden');
+            testPage.classList.remove('hidden');
+            resultPage.classList.add('hidden');
+            loadQuestion(currentQuestionIndex);
+            window.scrollTo(0, 0);
+        }
+
+        // 显示结果页
+        function showResultPage() {
+            homePage.classList.add('hidden');
+            testPage.classList.add('hidden');
+            resultPage.classList.remove('hidden');
+            calculateScores();
+            updateResultUI();
+            window.scrollTo(0, 0);
+        }
+
+        // 加载问题
+        function loadQuestion(index) {
+            const question = questions[index];
+            questionCategory.textContent = question.category;
+            questionText.textContent = question.text;
+            questionProgress.textContent = `第 ${index + 1} 题 / 共 ${questions.length} 题`;
+            progressBar.style.width = `${(index + 1) / questions.length * 100}%`;
+            
+            // 更新导航点状态
+            updateQuestionNav();
+            
+            // 更新按钮状态
+            prevBtn.disabled = index === 0;
+            
+            // 生成选项
+            optionsContainer.innerHTML = '';
+            question.options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = `option option-hover p-3 border border-gray-700 rounded-lg cursor-pointer ${userAnswers[index] === option.value ? 'option-selected' : ''}`;
+                optionDiv.dataset.value = option.value;
+                optionDiv.innerHTML = `
+                    <span class="font-medium mr-2">${String.fromCharCode(65 + question.options.indexOf(option))}：</span>
+                    <span>${option.text}</span>
+                `;
+                optionDiv.addEventListener('click', () => selectOption(option.value));
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // 更新下一题按钮文本
+            if (index === questions.length - 1) {
+                nextBtn.innerHTML = '提交<i class="fa fa-check ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = '下一题<i class="fa fa-arrow-right ml-2"></i>';
+            }
+            
+            currentQuestionIndex = index;
+        }
+
+        // 选择选项
+        function selectOption(value) {
+            userAnswers[currentQuestionIndex] = value;
+            
+            // 更新选项样式
+            document.querySelectorAll('.option').forEach(option => {
+                if (option.dataset.value === value.toString()) {
+                    option.classList.add('option-selected');
+                } else {
+                    option.classList.remove('option-selected');
+                }
+            });
+            
+            // 更新导航点状态
+            updateQuestionNav();
+        }
+
+        // 更新导航点状态
+        function updateQuestionNav() {
+            const navItems = questionNav.querySelectorAll('div');
+            navItems.forEach((item, index) => {
+                if (userAnswers[index] !== null) {
+                    item.classList.remove('bg-gray-700');
+                    item.classList.add('bg-accent');
+                } else {
+                    item.classList.remove('bg-accent');
+                    item.classList.add('bg-gray-700');
+                }
+                
+                if (index === currentQuestionIndex) {
+                    item.classList.add('ring-2', 'ring-white', 'ring-opacity-50');
+                } else {
+                    item.classList.remove('ring-2', 'ring-white', 'ring-opacity-50');
+                }
+            });
+        }
+
+        // 跳转到指定题目
+        function goToQuestion(index) {
+            if (index >= 0 && index < questions.length) {
+                loadQuestion(index);
+            }
+        }
+
+        // 上一题
+        function goToPrevQuestion() {
+            if (currentQuestionIndex > 0) {
+                goToQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        // 下一题
+        function goToNextQuestion() {
+            // 如果当前题目未选择选项，提示用户
+            if (userAnswers[currentQuestionIndex] === null) {
+                alert('请选择一个选项');
+                return;
+            }
+            
+            if (currentQuestionIndex < questions.length - 1) {
+                goToQuestion(currentQuestionIndex + 1);
+            } else {
+                // 无论是否答完所有题目，都直接提交
+                showResultPage();
+            }
+        }
+
+        // 优化的计分体系 - 确保0%-100%准确计分
+        function calculateScores() {
+            console.log('=== calculateScores 开始调试 ===');
+            console.log('userAnswers:', userAnswers);
+            console.log('已回答题目数量:', userAnswers.filter(a => a !== null).length);
+            
+            // 分数映射配置：将1-5分映射到0-100%
+            const scoreMapping = {
+                1: 0,    // 完全不同意 -> 0%
+                2: 25,   // 不同意 -> 25%
+                3: 50,   // 中立 -> 50%
+                4: 75,   // 同意 -> 75%
+                5: 100   // 完全同意 -> 100%
+            };
+            
+            // 初始化原始分数和最大可能分数
+            const rawScores = {
+                selfInterest: 0,
+                greed: 0,
+                machiavellianism: 0,
+                moralDisengagement: 0,
+                narcissism: 0,
+                psychologicalEntitlement: 0,
+                psychopathy: 0,
+                sadism: 0,
+                selfCentered: 0,
+                malevolence: 0
+            };
+            
+            const maxPossibleScores = {
+                selfInterest: 0,
+                greed: 0,
+                machiavellianism: 0,
+                moralDisengagement: 0,
+                narcissism: 0,
+                psychologicalEntitlement: 0,
+                psychopathy: 0,
+                sadism: 0,
+                selfCentered: 0,
+                malevolence: 0
+            };
+            
+            // 计算原始分数和最大可能分数
+            questions.forEach((question, index) => {
+                const answer = userAnswers[index];
+                console.log(`题目 ${index}: 答案 = ${answer}, 维度 =`, question.dimensions);
+                
+                if (answer !== null && answer !== undefined && question.dimensions) {
+                    const mappedScore = scoreMapping[answer] || 0;
+                    console.log(`  映射分数: ${mappedScore}`);
+                    
+                    Object.entries(question.dimensions).forEach(([dimension, weight]) => {
+                        if (rawScores[dimension] !== undefined) {
+                            // 用户得分 = 映射分数 × 权重
+                            rawScores[dimension] += mappedScore * weight;
+                            // 最大可能得分 = 100 × 权重
+                            maxPossibleScores[dimension] += 100 * weight;
+                            console.log(`  维度 ${dimension}: 权重 ${weight}, 原始分 += ${mappedScore * weight}`);
+                        }
+                    });
+                }
+            });
+            
+            console.log('原始分数:', rawScores);
+            console.log('最大可能分数:', maxPossibleScores);
+            
+            // 计算标准化分数（0-100%）
+            const normalizedScores = {};
+            Object.keys(rawScores).forEach(dimension => {
+                const rawScore = rawScores[dimension];
+                const maxScore = maxPossibleScores[dimension];
+                
+                console.log(`标准化 ${dimension}: 原始分=${rawScore}, 最大分=${maxScore}`);
+                
+                if (maxScore > 0) {
+                    // 标准化到0-100%范围，四舍五入到整数
+                    normalizedScores[dimension] = Math.round((rawScore / maxScore) * 100);
+                } else {
+                    normalizedScores[dimension] = 0;
+                }
+                
+                // 确保分数在有效范围内
+                normalizedScores[dimension] = Math.max(0, Math.min(100, normalizedScores[dimension]));
+                
+                console.log(`  结果: ${normalizedScores[dimension]}%`);
+            });
+            
+            // 计算黑暗三角人格总分(D因子)
+            // D = (马基雅维利主义 + 心理变态 + 自恋) / 3
+            const darkTriadTotal = Math.round((
+                normalizedScores.machiavellianism + 
+                normalizedScores.psychopathy + 
+                normalizedScores.narcissism
+            ) / 3);
+            
+            // 更新全局用户分数
+            Object.assign(userScores, {
+                ...normalizedScores,
+                darkTriadTotal: darkTriadTotal
+            });
+            
+            // 生成基于用户分数的排名数据（更真实的对比）
+            Object.keys(rankScores).forEach(key => {
+                if (key !== 'darkTriadTotal') {
+                    // 生成与用户分数相近的排名数据
+                    const userScore = userScores[key];
+                    const variation = (Math.random() - 0.5) * 30; // ±15%的变化
+                    let rankScore = userScore + variation;
+                    
+                    // 确保排名数据在合理范围内
+                    rankScore = Math.max(0, Math.min(100, rankScore));
+                    rankScores[key] = Math.round(rankScore);
+                }
+            });
+            
+            // 计算排名数据的黑暗三角总分
+            rankScores.darkTriadTotal = Math.round((
+                rankScores.machiavellianism + 
+                rankScores.psychopathy + 
+                rankScores.narcissism
+            ) / 3);
+        }
+
+        // 更新结果UI
+        function updateResultUI() {
+            console.log('=== updateResultUI 开始调试 ===');
+            console.log('userScores:', userScores);
+            
+            // 更新三大维度总分 - 使用正确的元素ID
+            console.log('马基雅维利主义分数:', userScores.machiavellianism);
+            console.log('精神变态分数:', userScores.psychopathy);
+            console.log('自恋分数:', userScores.narcissism);
+            
+            // 检查概览部分的元素是否存在
+            const machiavellianismScoreEl = document.getElementById('machiavellianism-score');
+            const psychopathyScoreEl = document.getElementById('psychopathy-score');
+            const narcissismScoreEl = document.getElementById('narcissism-score');
+            
+            console.log('概览元素存在检查:');
+            console.log('machiavellianism-score元素:', !!machiavellianismScoreEl);
+            console.log('psychopathy-score元素:', !!psychopathyScoreEl);
+            console.log('narcissism-score元素:', !!narcissismScoreEl);
+            
+            if (machiavellianismScoreEl) {
+                machiavellianismScoreEl.textContent = userScores.machiavellianism + '%';
+            }
+            if (psychopathyScoreEl) {
+                psychopathyScoreEl.textContent = userScores.psychopathy + '%';
+            }
+            if (narcissismScoreEl) {
+                narcissismScoreEl.textContent = userScores.narcissism + '%';
+            }
+            
+            // 更新三大维度等级
+            const machiavellianismLevelEl = document.getElementById('machiavellianism-level');
+            const psychopathyLevelEl = document.getElementById('psychopathy-level');
+            const narcissismLevelEl = document.getElementById('narcissism-level');
+            
+            console.log('等级元素存在检查:');
+            console.log('machiavellianism-level元素:', !!machiavellianismLevelEl);
+            console.log('psychopathy-level元素:', !!psychopathyLevelEl);
+            console.log('narcissism-level元素:', !!narcissismLevelEl);
+            
+            if (machiavellianismLevelEl) {
+                const level = getLevel(userScores.machiavellianism);
+                machiavellianismLevelEl.textContent = getLevelText(level);
+            }
+            if (psychopathyLevelEl) {
+                const level = getLevel(userScores.psychopathy);
+                psychopathyLevelEl.textContent = getLevelText(level);
+            }
+            if (narcissismLevelEl) {
+                const level = getLevel(userScores.narcissism);
+                narcissismLevelEl.textContent = getLevelText(level);
+            }
+            
+            // 更新黑暗三角总分
+            const darkTriadTotalScoreEl = document.getElementById('dark-triad-total-score');
+            const darkTriadTotalLevelEl = document.getElementById('dark-triad-total-level');
+            
+            console.log('总分元素存在检查:');
+            console.log('dark-triad-total-score元素:', !!darkTriadTotalScoreEl);
+            console.log('dark-triad-total-level元素:', !!darkTriadTotalLevelEl);
+            
+            if (darkTriadTotalScoreEl) {
+                darkTriadTotalScoreEl.textContent = userScores.darkTriadTotal + '%';
+            }
+            if (darkTriadTotalLevelEl) {
+                const level = getLevel(userScores.darkTriadTotal);
+                darkTriadTotalLevelEl.textContent = getLevelText(level);
+            }
+            
+            // 更新详细维度分析
+        updateDimensionUI('selfInterest', '利己主义');
+        updateDimensionUI('greed', '贪婪');
+        updateDimensionUI('machiavellianism', '马基雅维利主义');
+        updateDimensionUI('moralDisengagement', '道德推脱');
+        updateDimensionUI('narcissism', '自恋');
+        updateDimensionUI('psychologicalEntitlement', '心理权利');
+        updateDimensionUI('psychopathy', '精神变态');
+        updateDimensionUI('sadism', '施虐倾向');
+        updateDimensionUI('selfCentered', '自我为中心');
+        updateDimensionUI('malevolence', '恶毒倾向');
+            
+            // 更新雷达图
+            updateRadarCharts();
+            
+            // 更新综合分析
+            updateComprehensiveAnalysis();
+        }
+
+        // 更新维度UI
+        function updateDimensionUI(dimensionKey, dimensionName, elementIdPrefix = null) {
+            console.log(`=== updateDimensionUI 调试 ${dimensionKey} ===`);
+            
+            const prefix = elementIdPrefix || dimensionKey;
+            // 将驼峰式命名转换为连字符命名
+            let kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            
+            // 特殊处理复合词
+            const specialCases = {
+                'moralDisengagement': 'moral-disengagement',
+                'psychologicalEntitlement': 'psychological-entitlement',
+                'selfInterest': 'self-interest',
+                'selfCentered': 'self-centered'
+            };
+            
+            if (specialCases[dimensionKey]) {
+                kebabCasePrefix = specialCases[dimensionKey];
+            }
+            
+            console.log(`维度: ${dimensionKey}, 前缀: ${prefix}, kebabCase: ${kebabCasePrefix}`);
+            console.log(`分数: ${userScores[dimensionKey]}`);
+            
+            const score = userScores[dimensionKey];
+            const level = getLevel(score);
+            
+            // 更新概览区域（三大核心维度）
+            if (dimensionKey === 'machiavellianism' || dimensionKey === 'narcissism' || dimensionKey === 'psychopathy') {
+                const overviewScoreElement = document.getElementById(`${kebabCasePrefix}-score`);
+                const overviewLevelElement = document.getElementById(`${kebabCasePrefix}-level`);
+                
+                if (overviewScoreElement) {
+                    overviewScoreElement.textContent = score;
+                    console.log(`更新概览区域分数成功: ${dimensionKey} = ${score}`);
+                }
+                
+                if (overviewLevelElement) {
+                    const levelText = level === 'low' ? '低' : level === 'medium' ? '中' : '高';
+                    overviewLevelElement.textContent = levelText;
+                    console.log(`更新概览区域等级成功: ${dimensionKey} = ${levelText}`);
+                }
+            }
+            
+            // 更新详细分析区域（所有维度）
+            const detailScoreElement = document.getElementById(`detail-${kebabCasePrefix}-score`);
+            const detailBarElement = document.getElementById(`detail-${kebabCasePrefix}-bar`);
+            const detailAnalysisElement = document.getElementById(`detail-${kebabCasePrefix}-analysis`);
+            
+            console.log(`详细区域元素查找: score=${!!detailScoreElement}, bar=${!!detailBarElement}, analysis=${!!detailAnalysisElement}`);
+            
+            if (detailScoreElement) {
+                detailScoreElement.textContent = `${score}%`;
+                console.log(`更新详细区域分数成功: ${dimensionKey} = ${score}%`);
+            } else {
+                // 尝试普通ID格式（兼容其他维度）
+                const normalScoreElement = document.getElementById(`${kebabCasePrefix}-score`);
+                if (normalScoreElement && !dimensionKey.match(/^(machiavellianism|narcissism|psychopathy)$/)) {
+                    normalScoreElement.textContent = `${score}%`;
+                    console.log(`更新普通区域分数成功: ${dimensionKey} = ${score}%`);
+                }
+            }
+            
+            if (detailBarElement) {
+                detailBarElement.style.width = `${score}%`;
+                console.log(`更新详细区域进度条成功: ${dimensionKey} = ${score}%`);
+            } else {
+                // 尝试普通ID格式（兼容其他维度）
+                const normalBarElement = document.getElementById(`${kebabCasePrefix}-bar`);
+                if (normalBarElement && !dimensionKey.match(/^(machiavellianism|narcissism|psychopathy)$/)) {
+                    normalBarElement.style.width = `${score}%`;
+                    console.log(`更新普通区域进度条成功: ${dimensionKey} = ${score}%`);
+                }
+            }
+            
+            if (detailAnalysisElement) {
+                detailAnalysisElement.textContent = analysisTexts[dimensionKey][level];
+                console.log(`更新详细区域分析文本成功: ${dimensionKey} - ${level}级`);
+            } else {
+                // 尝试普通ID格式（兼容其他维度）
+                const normalAnalysisElement = document.getElementById(`${kebabCasePrefix}-analysis`);
+                if (normalAnalysisElement && !dimensionKey.match(/^(machiavellianism|narcissism|psychopathy)$/)) {
+                    normalAnalysisElement.textContent = analysisTexts[dimensionKey][level];
+                    console.log(`更新普通区域分析文本成功: ${dimensionKey} - ${level}级`);
+                }
+            }
+        }
+        
+        // 更新详细分析和建议
+        function updateDetailedAnalysis(dimensionKey, score, level, elementIdPrefix = null) {
+            console.log(`=== updateDetailedAnalysis 调试 ${dimensionKey} ===`);
+            console.log(`分数: ${score}, 等级: ${level}, 前缀: ${elementIdPrefix}`);
+            
+            // 由于移除了详细分析区块，此函数不再执行实际操作
+            // 保留函数结构以便后续需要时重新启用
+            console.log(`详细分析功能已简化，不再显示额外分析区块`);
+        }
+        
+        // 获取维度中文名称
+        function getDimensionChineseName(dimensionKey) {
+            const names = {
+                'machiavellianism': '马基雅维利主义',
+                'narcissism': '自恋',
+                'psychopathy': '精神变态'
+            };
+            return names[dimensionKey] || dimensionKey;
+        }
+        
+        // 获取等级文本
+        function getLevelText(level) {
+            const levelTexts = {
+                'low': 'Low',
+                'medium': 'Medium',
+                'high': 'High'
+            };
+            return levelTexts[level] || 'Unknown';
+        }
+        
+        // 获取建议内容
+        function getSuggestions(dimensionKey, level, score) {
+            const suggestions = {
+                machiavellianism: {
+                    low: [
+                        '继续保持你的正直和诚实品质',
+                        '在团队合作中发挥你的可信度',
+                        '帮助他人建立信任和透明度',
+                        '在需要策略性思考时，可以适当学习一些沟通技巧'
+                    ],
+                    medium: [
+                        '在保持策略性思维的同时，注意道德底线',
+                        '学会在诚实和策略之间找到平衡',
+                        '在职场竞争中保持公平竞争原则',
+                        '培养长期的人际关系，而非短期利益'
+                    ],
+                    high: [
+                        '反思自己的行为对他人的影响',
+                        '学习建立基于信任的人际关系',
+                        '考虑寻求专业心理咨询，了解深层动机',
+                        '练习同理心，尝试理解他人的感受和需求',
+                        '建立健康的道德标准和行为准则'
+                    ]
+                },
+                narcissism: {
+                    low: [
+                        '适当提升自信，认识到自己的价值和成就',
+                        '学会在适当的时候表达自己的想法和需求',
+                        '不要害怕在团队中承担领导角色',
+                        '培养健康的自我形象和自尊'
+                    ],
+                    medium: [
+                        '保持现有的健康自信水平',
+                        '继续发展自己的优势和能力',
+                        '在关注自己的同时，也要关注他人的贡献',
+                        '建立平衡的人际关系，避免过度自我中心'
+                    ],
+                    high: [
+                        '学习谦逊和感恩的态度',
+                        '关注他人的需求和感受，培养同理心',
+                        '接受批评和反馈，不要过度防御',
+                        '认识到每个人都有独特的价值和贡献',
+                        '建立真实的人际关系，而非基于炫耀的关系'
+                    ]
+                },
+                psychopathy: {
+                    low: [
+                        '继续保持你的善良和同理心',
+                        '在人际关系中发挥你的情感敏感度',
+                        '帮助他人处理情绪和冲突',
+                        '在需要理性决策时，可以适当平衡情感因素'
+                    ],
+                    medium: [
+                        '在理性和情感之间找到更好的平衡',
+                        '学会识别和管理自己的冲动情绪',
+                        '在做出重要决策时，考虑长期后果',
+                        '培养更深层次的情感连接和人际关系'
+                    ],
+                    high: [
+                        '认真考虑寻求专业心理健康支持',
+                        '学习识别和理解自己及他人的情绪',
+                        '练习冲动控制和延迟满足',
+                        '建立健康的道德和伦理标准',
+                        '考虑行为对他人造成的伤害和后果',
+                        '发展真正的同理心和情感连接能力'
+                    ]
+                }
+            };
+            
+            return suggestions[dimensionKey][level] || [];
+        }
+        
+        // 更新黑暗三角总分UI
+        function updateDarkTriadTotalUI() {
+            const scoreElement = document.getElementById('dark-triad-total-score');
+            const barElement = document.getElementById('dark-triad-total-bar');
+            
+            if (scoreElement && barElement) {
+                const score = userScores.darkTriadTotal;
+                scoreElement.textContent = `${score}%`;
+                barElement.style.width = `${score}%`;
+            }
+        }
+
+        // 获取等级（低、中、高）
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        // 初始化雷达图
+        function initRadarCharts() {
+            const ctx = document.getElementById('combined-radar-chart').getContext('2d');
+            
+            const options = {
+                scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            pointLabels: {
+                                color: '#F8F9FA',
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                stepSize: 10,
+                                min: 0,
+                                max: 100
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#F8F9FA',
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        tension: 0.2
+                    }
+                }
+            };
+            
+            combinedRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['利己主义', '贪婪', '马基雅维利主义', '道德推脱', '自恋', '心理权利', '精神变态', '施虐倾向', '自我为中心', '恶毒倾向', '黑暗三角总分(D)'],
+                    datasets: [
+                        {
+                            label: '你的分数',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(157, 78, 221, 0.2)',
+                            borderColor: 'rgba(157, 78, 221, 1)',
+                            pointBackgroundColor: 'rgba(157, 78, 221, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(157, 78, 221, 1)'
+                        },
+                        {
+                            label: '人群排名',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+                        }
+                    ]
+                },
+                options: options
+            });
+        }
+
+        // 更新雷达图
+        function updateRadarCharts() {
+            const userData = [
+                userScores.selfInterest,
+                userScores.greed,
+                userScores.machiavellianism,
+                userScores.moralDisengagement,
+                userScores.narcissism,
+                userScores.psychologicalEntitlement,
+                userScores.psychopathy,
+                userScores.sadism,
+                userScores.selfCentered,
+                userScores.malevolence,
+                userScores.darkTriadTotal
+            ];
+            
+            const rankData = [
+                rankScores.selfInterest,
+                rankScores.greed,
+                rankScores.machiavellianism,
+                rankScores.moralDisengagement,
+                rankScores.narcissism,
+                rankScores.psychologicalEntitlement,
+                rankScores.psychopathy,
+                rankScores.sadism,
+                rankScores.selfCentered,
+                rankScores.malevolence,
+                rankScores.darkTriadTotal
+            ];
+            
+            // 确保数据在合理范围内（0-100）
+            const normalizedUserData = userData.map(score => Math.max(0, Math.min(100, score)));
+            
+            // 确保排名数据不超过用户分数
+            const adjustedRankData = rankData.map((rankScore, index) => {
+                const userScore = normalizedUserData[index];
+                // 如果排名分数超过用户分数，则调整为用户分数的0.5-1倍之间
+                if (rankScore > userScore) {
+                    return userScore * (0.5 + Math.random() * 0.5);
+                }
+                return Math.max(0, Math.min(100, rankScore));
+            });
+            
+            combinedRadarChart.data.datasets[0].data = normalizedUserData;
+            combinedRadarChart.data.datasets[1].data = adjustedRankData;
+            
+            combinedRadarChart.update();
+        }
+
+        // 更新综合分析
+        function updateComprehensiveAnalysis() {
+            const comprehensiveAnalysisElement = document.getElementById('comprehensive-analysis');
+            
+            // 计算平均分数
+            const averageScore = Object.values(userScores).reduce((sum, score) => sum + parseFloat(score), 0) / Object.values(userScores).length;
+            
+            // 获取综合分析文本
+            let level = 'low';
+            if (averageScore >= 33 && averageScore < 66) {
+                level = 'medium';
+            } else if (averageScore >= 66) {
+                level = 'high';
+            }
+            
+            comprehensiveAnalysisElement.innerHTML = `
+                <p class="mb-4">${comprehensiveAnalyses[level]}</p>
+                <p class="font-medium text-accent">建议：</p>
+                <ul class="list-disc pl-5 mt-2 space-y-2">
+                    <li>尝试从他人的角度思考问题，增强同理心</li>
+                    <li>在追求个人目标的同时，关注他人的感受和需求</li>
+                    <li>建立健康的人际关系，培养信任和合作精神</li>
+                    <li>定期反思自己的行为和动机，保持自我觉察</li>
+                </ul>
+            `;
+        }
+
+        // 重新测试
+        function restartTest() {
+            // 重置答案
+            userAnswers.fill(null);
+            
+            // 重置当前题目索引
+            currentQuestionIndex = 0;
+            
+            // 返回首页
+            showHomePage();
+        }
+
+        // 验证兑换码
+        function verifyCode() {
+            const code = codeInput.value.trim();
+            
+            if (validCodes.includes(code)) {
+                // 兑换码有效，隐藏验证区域，显示开始测试按钮
+                codeVerification.classList.add('hidden');
+                document.getElementById('test-info').classList.remove('hidden');
+                startTestBtn.classList.remove('hidden');
+                codeError.classList.add('hidden');
+            } else {
+                // 兑换码无效，显示错误信息
+                codeError.classList.remove('hidden');
+            }
+        }
+
+        // 显示模态框
+        function showModal(modal) {
+            hideAllModals();
+            modal.classList.add('show');
+        }
+
+        // 隐藏所有模态框
+        function hideAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+            });
+        }
+
+        // 切换移动端菜单
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

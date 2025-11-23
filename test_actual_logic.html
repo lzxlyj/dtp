@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试实际逻辑 - 黑暗三角人格测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #f0f0f0; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 5px; background: #2a2a2a; }
+        .result { margin: 10px 0; padding: 10px; background: #333; border-radius: 3px; }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #495057; color: white; border: none; border-radius: 3px; }
+        button:hover { background: #5c636a; }
+        
+        /* 模拟原页面的样式 */
+        .overview-section { background: #2a2a2a; padding: 20px; border-radius: 8px; margin: 15px 0; }
+        .detail-section { background: #1f1f1f; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .score-display { color: #a78bfa; font-weight: bold; }
+        .progress-bar { background: #495057; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { background: #a78bfa; height: 100%; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+    <h1>测试实际逻辑 - 黑暗三角人格测试结果分析</h1>
+    
+    <!-- 模拟概览区域 -->
+    <div class="test-section overview-section">
+        <h2>结果概览</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div style="text-align: center; padding: 15px; border: 1px solid #495057; border-radius: 5px;">
+                <h3 style="font-size: 12px; color: #adb5bd; margin-bottom: 5px;">马基雅维利主义</h3>
+                <p id="machiavellianism-score" class="score-display" style="font-size: 24px;">0</p>
+                <p id="machiavellianism-level" style="font-size: 10px; color: #adb5bd;">低</p>
+            </div>
+            <div style="text-align: center; padding: 15px; border: 1px solid #495057; border-radius: 5px;">
+                <h3 style="font-size: 12px; color: #adb5bd; margin-bottom: 5px;">心理变态特质</h3>
+                <p id="psychopathy-score" class="score-display" style="font-size: 24px;">0</p>
+                <p id="psychopathy-level" style="font-size: 10px; color: #adb5bd;">低</p>
+            </div>
+            <div style="text-align: center; padding: 15px; border: 1px solid #495057; border-radius: 5px;">
+                <h3 style="font-size: 12px; color: #adb5bd; margin-bottom: 5px;">自恋特质</h3>
+                <p id="narcissism-score" class="score-display" style="font-size: 24px;">0</p>
+                <p id="narcissism-level" style="font-size: 10px; color: #adb5bd;">低</p>
+            </div>
+        </div>
+        <div style="text-align: center; padding: 15px; border: 1px solid #495057; border-radius: 5px; margin-top: 15px;">
+            <h3 style="font-size: 12px; color: #adb5bd; margin-bottom: 5px;">黑暗三角总分(D)</h3>
+            <p id="dark-triad-total-score" class="score-display" style="font-size: 24px;">0</p>
+            <p id="dark-triad-total-level" style="font-size: 10px; color: #adb5bd;">低</p>
+        </div>
+    </div>
+    
+    <!-- 模拟详细分析区域 -->
+    <div class="test-section detail-section">
+        <h2>详细维度分析</h2>
+        
+        <!-- 马基雅维利主义 -->
+        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #495057; border-radius: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">马基雅维利主义</h3>
+                <div style="display: flex; align-items: center;">
+                    <span id="machiavellianism-detail-score" style="margin-right: 10px; color: #a78bfa;">0%</span>
+                    <div class="progress-bar" style="width: 120px;">
+                        <div id="machiavellianism-detail-bar" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <p id="machiavellianism-analysis" style="font-size: 14px; color: #ced4da; margin-bottom: 10px;">分析内容将显示在这里</p>
+            <div style="margin-top: 15px; padding: 15px; background: #2a2a2a; border-left: 4px solid #a78bfa; border-radius: 3px;">
+                <h4 style="color: #a78bfa; margin-bottom: 8px;">详细分析：</h4>
+                <p style="font-size: 12px; color: #ced4da; margin-bottom: 8px;">
+                    <span id="machiavellianism-detail-percentage-text"></span>
+                </p>
+                <h5 style="color: #a78bfa; margin-bottom: 5px;">建议：</h5>
+                <ul id="machiavellianism-detail-suggestions" style="font-size: 12px; color: #ced4da; padding-left: 20px;"></ul>
+            </div>
+        </div>
+        
+        <!-- 自恋 -->
+        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #495057; border-radius: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">自恋</h3>
+                <div style="display: flex; align-items: center;">
+                    <span id="narcissism-detail-score" style="margin-right: 10px; color: #a78bfa;">0%</span>
+                    <div class="progress-bar" style="width: 120px;">
+                        <div id="narcissism-detail-bar" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <p id="narcissism-analysis" style="font-size: 14px; color: #ced4da; margin-bottom: 10px;">分析内容将显示在这里</p>
+            <div style="margin-top: 15px; padding: 15px; background: #2a2a2a; border-left: 4px solid #a78bfa; border-radius: 3px;">
+                <h4 style="color: #a78bfa; margin-bottom: 8px;">详细分析：</h4>
+                <p style="font-size: 12px; color: #ced4da; margin-bottom: 8px;">
+                    <span id="narcissism-detail-percentage-text"></span>
+                </p>
+                <h5 style="color: #a78bfa; margin-bottom: 5px;">建议：</h5>
+                <ul id="narcissism-detail-suggestions" style="font-size: 12px; color: #ced4da; padding-left: 20px;"></ul>
+            </div>
+        </div>
+        
+        <!-- 精神变态 -->
+        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #495057; border-radius: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">精神变态</h3>
+                <div style="display: flex; align-items: center;">
+                    <span id="psychopathy-detail-score" style="margin-right: 10px; color: #a78bfa;">0%</span>
+                    <div class="progress-bar" style="width: 120px;">
+                        <div id="psychopathy-detail-bar" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <p id="psychopathy-analysis" style="font-size: 14px; color: #ced4da; margin-bottom: 10px;">分析内容将显示在这里</p>
+            <div style="margin-top: 15px; padding: 15px; background: #2a2a2a; border-left: 4px solid #a78bfa; border-radius: 3px;">
+                <h4 style="color: #a78bfa; margin-bottom: 8px;">详细分析：</h4>
+                <p style="font-size: 12px; color: #ced4da; margin-bottom: 8px;">
+                    <span id="psychopathy-detail-percentage-text"></span>
+                </p>
+                <h5 style="color: #a78bfa; margin-bottom: 5px;">建议：</h5>
+                <ul id="psychopathy-detail-suggestions" style="font-size: 12px; color: #ced4da; padding-left: 20px;"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试实际逻辑</h2>
+        <button onclick="testActualLogic()">测试实际逻辑</button>
+        <button onclick="clearResults()">清除结果</button>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // 模拟userScores数据
+        const userScores = {
+            machiavellianism: 75,
+            narcissism: 60,
+            psychopathy: 45,
+            darkTriadTotal: 60
+        };
+
+        // 分析文本
+        const analysisTexts = {
+            machiavellianism: {
+                low: '您的马基雅维利主义倾向较低，表明您通常以诚实和直接的方式与人交往。',
+                medium: '您的马基雅维利主义倾向中等，表明您在人际交往中具有一定的策略性。',
+                high: '您的马基雅维利主义倾向较高，表明您在人际交往中倾向于使用策略和操控手段。'
+            },
+            narcissism: {
+                low: '您的自恋程度较低，表明您通常保持谦逊的态度。',
+                medium: '您的自恋程度中等，表明您具有适度的自信。',
+                high: '您的自恋程度较高，表明您倾向于自我中心和寻求关注。'
+            },
+            psychopathy: {
+                low: '您的精神变态特质较低，表明您具有正常的情感反应和同理心。',
+                medium: '您的精神变态特质中等，表明您在情感反应方面处于正常范围。',
+                high: '您的精神变态特质较高，表明您可能在情感反应和冲动控制方面存在困难。'
+            }
+        };
+
+        function getLevel(score) {
+            if (score < 33) return 'low';
+            if (score < 66) return 'medium';
+            return 'high';
+        }
+
+        function getDimensionChineseName(dimensionKey) {
+            const names = {
+                'machiavellianism': '马基雅维利主义',
+                'narcissism': '自恋',
+                'psychopathy': '精神变态'
+            };
+            return names[dimensionKey] || dimensionKey;
+        }
+
+        function getLevelText(level) {
+            const levelTexts = {
+                'low': '较低',
+                'medium': '中等',
+                'high': '较高'
+            };
+            return levelTexts[level] || '未知';
+        }
+
+        function getSuggestions(dimensionKey, level, score) {
+            const suggestions = {
+                machiavellianism: {
+                    low: ['继续保持你的正直和诚实品质', '在团队合作中发挥你的可信度'],
+                    medium: ['在保持策略性思维的同时，注意道德底线', '学会在诚实和策略之间找到平衡'],
+                    high: ['反思自己的行为对他人的影响', '学习建立基于信任的人际关系']
+                },
+                narcissism: {
+                    low: ['适当提升自信，认识到自己的价值和成就', '学会在适当的时候表达自己的想法'],
+                    medium: ['保持现有的健康自信水平', '继续发展自己的优势和能力'],
+                    high: ['学习谦逊和感恩的态度', '关注他人的需求和感受，培养同理心']
+                },
+                psychopathy: {
+                    low: ['继续保持你的善良和同理心', '在人际关系中发挥你的情感敏感度'],
+                    medium: ['在理性和情感之间找到更好的平衡', '学会识别和管理自己的冲动情绪'],
+                    high: ['认真考虑寻求专业心理健康支持', '学习识别和理解自己及他人的情绪']
+                }
+            };
+            return suggestions[dimensionKey][level] || [];
+        }
+
+        // 模拟实际的updateResultUI函数
+        function updateResultUI() {
+            let results = '<h3>执行updateResultUI函数：</h3>';
+            
+            // 1. 更新概览区域
+            results += '<h4>1. 更新概览区域：</h4>';
+            
+            const machScoreElement = document.getElementById('machiavellianism-score');
+            const psychScoreElement = document.getElementById('psychopathy-score');
+            const narcScoreElement = document.getElementById('narcissism-score');
+            
+            if (machScoreElement) {
+                machScoreElement.textContent = userScores.machiavellianism.toFixed(1) + '%';
+                results += `<span class="success">✓ 马基雅维利主义概览分数更新: ${userScores.machiavellianism.toFixed(1)}%</span><br>`;
+            } else {
+                results += `<span class="error">✗ 马基雅维利主义概览元素未找到</span><br>`;
+            }
+            
+            if (psychScoreElement) {
+                psychScoreElement.textContent = userScores.psychopathy.toFixed(1) + '%';
+                results += `<span class="success">✓ 精神变态概览分数更新: ${userScores.psychopathy.toFixed(1)}%</span><br>`;
+            } else {
+                results += `<span class="error">✗ 精神变态概览元素未找到</span><br>`;
+            }
+            
+            if (narcScoreElement) {
+                narcScoreElement.textContent = userScores.narcissism.toFixed(1) + '%';
+                results += `<span class="success">✓ 自恋概览分数更新: ${userScores.narcissism.toFixed(1)}%</span><br>`;
+            } else {
+                results += `<span class="error">✗ 自恋概览元素未找到</span><br>`;
+            }
+            
+            // 更新等级
+            const machLevelElement = document.getElementById('machiavellianism-level');
+            const psychLevelElement = document.getElementById('psychopathy-level');
+            const narcLevelElement = document.getElementById('narcissism-level');
+            
+            if (machLevelElement) {
+                machLevelElement.textContent = getLevelText(getLevel(userScores.machiavellianism));
+            }
+            if (psychLevelElement) {
+                psychLevelElement.textContent = getLevelText(getLevel(userScores.psychopathy));
+            }
+            if (narcLevelElement) {
+                narcLevelElement.textContent = getLevelText(getLevel(userScores.narcissism));
+            }
+            
+            // 更新黑暗三角总分
+            const totalScoreElement = document.getElementById('dark-triad-total-score');
+            const totalLevelElement = document.getElementById('dark-triad-total-level');
+            
+            if (totalScoreElement) {
+                totalScoreElement.textContent = userScores.darkTriadTotal.toFixed(1) + '%';
+                results += `<span class="success">✓ 黑暗三角总分更新: ${userScores.darkTriadTotal.toFixed(1)}%</span><br>`;
+            }
+            if (totalLevelElement) {
+                totalLevelElement.textContent = getLevelText(getLevel(userScores.darkTriadTotal));
+            }
+            
+            // 2. 更新详细分析区域
+            results += '<h4>2. 更新详细分析区域：</h4>';
+            results += updateDimensionUI('machiavellianism', '马基雅维利主义', 'machiavellianism-detail');
+            results += updateDimensionUI('narcissism', '自恋', 'narcissism-detail');
+            results += updateDimensionUI('psychopathy', '精神变态', 'psychopathy-detail');
+            
+            document.getElementById('test-results').innerHTML = results;
+        }
+
+        // 模拟实际的updateDimensionUI函数
+        function updateDimensionUI(dimensionKey, dimensionName, elementIdPrefix = null) {
+            const prefix = elementIdPrefix || dimensionKey;
+            const kebabCasePrefix = prefix.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            const scoreElement = document.getElementById(`${kebabCasePrefix}-score`);
+            const barElement = document.getElementById(`${kebabCasePrefix}-bar`);
+            const analysisElement = document.getElementById(`${kebabCasePrefix}-analysis`);
+            
+            let result = `<strong>${dimensionName}:</strong> 查找元素 ${kebabCasePrefix}-score, ${kebabCasePrefix}-bar, ${kebabCasePrefix}-analysis<br>`;
+            
+            if (scoreElement && barElement && analysisElement) {
+                const score = userScores[dimensionKey];
+                scoreElement.textContent = `${score}%`;
+                barElement.style.width = `${score}%`;
+                
+                const level = getLevel(score);
+                analysisElement.textContent = analysisTexts[dimensionKey][level];
+                
+                result += `<span class="success">✓ 基本元素更新成功 - ${dimensionName}: ${score}%</span><br>`;
+                
+                // 更新三大维度的详细分析和建议
+                if (dimensionKey === 'machiavellianism' || dimensionKey === 'narcissism' || dimensionKey === 'psychopathy') {
+                    result += updateDetailedAnalysis(dimensionKey, score, level);
+                }
+            } else {
+                result += `<span class="error">✗ 基本元素未找到 - ${dimensionName}</span><br>`;
+            }
+            
+            return result;
+        }
+
+        // 模拟实际的updateDetailedAnalysis函数
+        function updateDetailedAnalysis(dimensionKey, score, level) {
+            const percentageTextElement = document.getElementById(`${dimensionKey}-detail-percentage-text`);
+            const suggestionsElement = document.getElementById(`${dimensionKey}-detail-suggestions`);
+            
+            let result = `详细分析 - 查找: ${dimensionKey}-detail-percentage-text, ${dimensionKey}-detail-suggestions<br>`;
+            
+            if (percentageTextElement && suggestionsElement) {
+                percentageTextElement.textContent = `您的${getDimensionChineseName(dimensionKey)}得分为${score}%，属于${getLevelText(level)}水平。`;
+                
+                const suggestions = getSuggestions(dimensionKey, level, score);
+                suggestionsElement.innerHTML = suggestions.map(suggestion => `<li>${suggestion}</li>`).join('');
+                
+                result += `<span class="success">✓ 详细分析更新成功 - ${suggestions.length}条建议</span><br>`;
+            } else {
+                result += `<span class="error">✗ 详细分析元素未找到</span><br>`;
+            }
+            
+            return result;
+        }
+
+        function clearResults() {
+            // 重置所有显示元素
+            const elements = [
+                'machiavellianism-score', 'machiavellianism-level',
+                'psychopathy-score', 'psychopathy-level',
+                'narcissism-score', 'narcissism-level',
+                'dark-triad-total-score', 'dark-triad-total-level',
+                'machiavellianism-detail-score', 'machiavellianism-detail-bar', 'machiavellianism-analysis',
+                'machiavellianism-detail-percentage-text', 'machiavellianism-detail-suggestions',
+                'narcissism-detail-score', 'narcissism-detail-bar', 'narcissism-analysis',
+                'narcissism-detail-percentage-text', 'narcissism-detail-suggestions',
+                'psychopathy-detail-score', 'psychopathy-detail-bar', 'psychopathy-analysis',
+                'psychopathy-detail-percentage-text', 'psychopathy-detail-suggestions'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (id.includes('-bar')) {
+                        element.style.width = '0%';
+                    } else if (id.includes('-suggestions')) {
+                        element.innerHTML = '';
+                    } else if (id.includes('-score')) {
+                        element.textContent = '0';
+                    } else if (id.includes('-level') || id.includes('-analysis')) {
+                        element.textContent = '低';
+                    } else {
+                        element.textContent = '';
+                    }
+                }
+            });
+            
+            document.getElementById('test-results').innerHTML = '';
+        }
+
+        // 页面加载时显示初始状态
+        window.onload = function() {
+            clearResults();
+        };
+    </script>
+</body>
+</html>
